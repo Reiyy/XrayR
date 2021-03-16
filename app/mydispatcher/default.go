@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/RManLuo/XrayR/common/limiter"
+	"github.com/XrayR-project/XrayR/common/limiter"
 	"github.com/xtls/xray-core/common"
 	"github.com/xtls/xray-core/common/buf"
 	"github.com/xtls/xray-core/common/log"

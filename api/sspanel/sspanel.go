@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/RManLuo/XrayR/api"
+	"github.com/XrayR-project/XrayR/api"
 	"github.com/go-resty/resty/v2"
 )
 
