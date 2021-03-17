@@ -232,13 +232,15 @@ func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (
 		return nil, err
 	}
 
-	TLStype := serverConf[3]
+	transportProtocol := serverConf[3]
+	
+	TLStype := serverConf[4]
 	if TLStype == "tls" || TLStype == "xtls" {
 		enableTLS = true
 	} else {
 		enableTLS = false
 	}
-	transportProtocol := serverConf[4]
+	
 	extraServerConf := strings.Split(serverConf[5], "|")
 
 	for _, item := range extraServerConf {
