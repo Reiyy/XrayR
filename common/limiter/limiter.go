@@ -37,7 +37,7 @@ func (l *Limiter) AddInboundLimiter(tag string, nodeSpeedLimit uint64, userList 
 	}
 	userMap := new(sync.Map)
 	for _, user := range *userList {
-		userMap.Store(user.Email, &user)
+		userMap.Store(user.Email, user)
 	}
 	inboundInfo.UserInfo = userMap
 	l.InboundInfo.Store(tag, inboundInfo) // Replace the old inbound info
@@ -55,7 +55,7 @@ func (l *Limiter) UpdateInboundLimiter(tag string, updatedNodeSpeedLimit uint64,
 		inboundInfo.NodeSpeedLimit = updatedNodeSpeedLimit
 		// Update User info
 		for _, u := range *updatedUserList {
-			inboundInfo.UserInfo.Store(u.Email, &u)
+			inboundInfo.UserInfo.Store(u.Email, u)
 			limit := determineRate(updatedNodeSpeedLimit, u.SpeedLimit)                                              // If need the limit
 			limiter := ratelimit.NewBucketWithQuantum(time.Duration(int64(time.Second)), int64(limit), int64(limit)) // Byte/s
 			inboundInfo.BucketHub.Store(u.Email, limiter)
@@ -102,7 +102,7 @@ func (l *Limiter) GetUserBucket(tag string, email string, ip string) (limiter *r
 		var deviceLimit int = 0
 		var uid int = 0
 		if v, ok := inboundInfo.UserInfo.Load(email); ok {
-			u := v.(*api.UserInfo)
+			u := v.(api.UserInfo)
 			uid = u.UID
 			userLimit = u.SpeedLimit
 			deviceLimit = u.DeviceLimit
