@@ -210,7 +210,7 @@ ip;443;2;tls;ws;path=/xxx|server=域名|host=CDN域名
 请注意，节点类型请选择：`Shadowsocks - V2Ray-Plugin`
 （实验性配置，下个版本会切换成单端口多用户）
 ```
-域名或IP;监听端口|server=xx
+域名或IP;监听端口;server=xx
 ```
 #### Shadowsocks 示例
 ```
