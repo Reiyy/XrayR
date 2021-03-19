@@ -208,12 +208,13 @@ ip;443;2;tls;ws;path=/xxx|server=域名|host=CDN域名
 | ShadowsocksAEAD | √        | aes-128-gcm, aes-256-gcm, chacha20-poly1305 |
 #### SSpanel-uim 节点地址格式
 请注意，节点类型请选择：`Shadowsocks - V2Ray-Plugin`
+（实验性配置，下个版本会切换成单端口多用户）
 ```
 域名或IP;监听端口|server=xx
 ```
 #### Shadowsocks 示例
 ```
-示例：gz.aaa.com;12345|server=gz.aaa.com
+示例：gz.aaa.com;12345;server=gz.aaa.com
 ```
 
 
