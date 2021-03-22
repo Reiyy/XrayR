@@ -86,9 +86,9 @@ func InboundBuilder(nodeInfo *api.NodeInfo, certConfig *CertConfig) (*core.Inbou
 	}
 
 	streamSetting.Network = &transportProtocol
-	streamSetting.Security = nodeInfo.TLSType
 	// Build TLS and XTLS settings
-	if nodeInfo.EnableTLS {
+	if nodeInfo.EnableTLS && certConfig.CertMode != "none" {
+		streamSetting.Security = nodeInfo.TLSType
 		certFile, keyFile, err := getCertFile(certConfig)
 		if err != nil {
 			return nil, err

@@ -108,7 +108,7 @@ Nodes:
     ControllerConfig:
       UpdatePeriodic: 60 # Time to update the nodeinfo, how many sec.
       CertConfig:
-        CertMode: dns # Option about how to get certificate: none, file, http, dns
+        CertMode: dns # Option about how to get certificate: none, file, http, dns. Choose "none" will forcedly disable the tls config.
         CertDomain: "node1.test.com" # Domain to cert
         CertFile: ./cert/node1.test.com.cert # Provided if the CertMode is file
         KeyFile: ./cert/node1.test.com.key
