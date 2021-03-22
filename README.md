@@ -73,6 +73,10 @@ A Xray backend framework that can easily support many panels.
 
 [XrayR通知](https://t.me/XrayR_channel)
 
+## 使用Docker安装
+
+[XrayR-release](https://github.com/XrayR-project/XrayR-release/blob/master/README.md)
+
 ## 下载并使用
 1. 在此处，根据自身系统选择合适的版本：[Release](https://github.com/XrayR-project/XrayR/releases)
 2. 解压压缩包，之后运行：`./XrayR -config config.yml`
