@@ -99,12 +99,15 @@ func (c *APIClient) GetNodeInfo() (nodeInfo *api.NodeInfo, err error) {
 	if err := json.Unmarshal(response.Data, nodeInfoResponse); err != nil {
 		return nil, fmt.Errorf("Unmarshal %s failed: %s", reflect.TypeOf(nodeInfoResponse), err)
 	}
-	switch c.NodeType {
-	case "V2ray":
+	switch nodeInfoResponse.Sort {
+	case 11:
+		c.NodeType = "V2ray"
 		nodeInfo, err = c.ParseV2rayNodeResponse(nodeInfoResponse)
-	case "Trojan":
+	case 14:
+		c.NodeType = "Trojan"
 		nodeInfo, err = c.ParseTrojanNodeResponse(nodeInfoResponse)
-	case "Shadowsocks":
+	case 0:
+		c.NodeType = "Shadowsocks"
 		nodeInfo, err = c.ParseSSNodeResponse(nodeInfoResponse)
 	default:
 		return nil, fmt.Errorf("Unsupported Node type: %s", c.NodeType)
@@ -233,14 +236,14 @@ func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (
 	}
 
 	transportProtocol := serverConf[3]
-	
+
 	TLStype := serverConf[4]
 	if TLStype == "tls" || TLStype == "xtls" {
 		enableTLS = true
 	} else {
 		enableTLS = false
 	}
-	
+
 	extraServerConf := strings.Split(serverConf[5], "|")
 
 	for _, item := range extraServerConf {
