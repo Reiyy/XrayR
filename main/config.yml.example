@@ -10,8 +10,10 @@ Nodes:
       ApiKey: "123"
       NodeID: 41
       NodeType: V2ray # Node type: V2ray, Shadowsocks, Trojan
+      EnableVless: false # Enable Vless for V2ray Type, Prefer remote configuration
+      EnableXTLS: false # Enable XTLS for V2ray and Trojan， Prefer remote configuration
     ControllerConfig:
-      ListenIP:  # IP address you want to listen
+      ListenIP: 0.0.0.0 # IP address you want to listen
       UpdatePeriodic: 60 # Time to update the nodeinfo, how many sec.
       CertConfig:
         CertMode: dns # Option about how to get certificate: none, file, http, dns. Choose "none" will forcedly disable the tls config.
