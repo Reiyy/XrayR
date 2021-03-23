@@ -255,7 +255,8 @@ func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (
 		value := conf[1]
 		switch key {
 		case "path":
-			path = value
+			rawPath := strings.Join(conf[1:], "=") // In case of the path strings contains the "="
+			path = rawPath
 		case "host":
 			host = value
 		case "enable_vless":
