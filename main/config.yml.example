@@ -11,6 +11,7 @@ Nodes:
       NodeID: 41
       NodeType: V2ray # Node type: V2ray, Shadowsocks, Trojan
     ControllerConfig:
+      ListenIP:  # IP address you want to listen
       UpdatePeriodic: 60 # Time to update the nodeinfo, how many sec.
       CertConfig:
         CertMode: dns # Option about how to get certificate: none, file, http, dns. Choose "none" will forcedly disable the tls config.
