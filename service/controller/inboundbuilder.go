@@ -7,15 +7,20 @@ import (
 
 	"github.com/XrayR-project/XrayR/api"
 	"github.com/XrayR-project/XrayR/common/legocmd"
-
+	"github.com/xtls/xray-core/common/net"
 	"github.com/xtls/xray-core/common/uuid"
 	"github.com/xtls/xray-core/core"
 	"github.com/xtls/xray-core/infra/conf"
 )
 
 //InboundBuilder build Inbound config for different protocol
-func InboundBuilder(nodeInfo *api.NodeInfo, certConfig *CertConfig) (*core.InboundHandlerConfig, error) {
+func InboundBuilder(listenIP string, nodeInfo *api.NodeInfo, certConfig *CertConfig) (*core.InboundHandlerConfig, error) {
 	inboundDetourConfig := &conf.InboundDetourConfig{}
+	// Build Listen IP address
+	if listenIP != "" {
+		ipAddress := net.ParseAddress(listenIP)
+		inboundDetourConfig.ListenOn = &conf.Address{ipAddress}
+	}
 
 	// Build Port
 	portRange := &conf.PortRange{From: uint32(nodeInfo.Port), To: uint32(nodeInfo.Port)}
