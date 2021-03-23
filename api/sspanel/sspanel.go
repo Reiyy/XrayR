@@ -24,11 +24,13 @@ var (
 
 // APIClient create a api client to the panel.
 type APIClient struct {
-	client   *resty.Client
-	APIHost  string
-	NodeID   int
-	Key      string
-	NodeType string
+	client      *resty.Client
+	APIHost     string
+	NodeID      int
+	Key         string
+	NodeType    string
+	EnableVless bool
+	EnableXTLS  bool
 }
 
 // New creat a api instance
@@ -40,11 +42,13 @@ func New(apiConfig *api.Config) *APIClient {
 	// Create Key for each requests
 	client.SetQueryParam("key", apiConfig.Key)
 	apiClient := &APIClient{
-		client:   client,
-		NodeID:   apiConfig.NodeID,
-		Key:      apiConfig.Key,
-		APIHost:  apiConfig.APIHost,
-		NodeType: apiConfig.NodeType,
+		client:      client,
+		NodeID:      apiConfig.NodeID,
+		Key:         apiConfig.Key,
+		APIHost:     apiConfig.APIHost,
+		NodeType:    apiConfig.NodeType,
+		EnableVless: apiConfig.EnableVless,
+		EnableXTLS:  apiConfig.EnableXTLS,
 	}
 	return apiClient
 }
@@ -220,6 +224,7 @@ func (c *APIClient) ReportUserTraffic(userTraffic *[]api.UserTraffic) error {
 // ParseV2rayNodeResponse parse the response for the given nodeinfor format
 func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (*api.NodeInfo, error) {
 	var enableTLS, enableVless bool
+	enableVless = c.EnableVless
 	var path, host string
 	if nodeInfoResponse.RawServerString == "" {
 		return nil, fmt.Errorf("No server info in response")
@@ -263,8 +268,6 @@ func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (
 			{
 				if value == "true" {
 					enableVless = true
-				} else {
-					enableVless = false
 				}
 			}
 		}

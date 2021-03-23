@@ -6,6 +6,8 @@ type Config struct {
 	NodeID   int    `mapstructure:"NodeID"`
 	Key      string `mapstructure:"ApiKey"`
 	NodeType string `mapstructure:"NodeType"`
+	EnableVless bool `mapstructure:"EnableVless"`
+	EnableXTLS bool `mapstructure:"EnableXTLS"`
 }
 
 // Node status
