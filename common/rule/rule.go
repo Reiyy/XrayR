@@ -10,11 +10,12 @@ import (
 	"sync"
 
 	"github.com/XrayR-project/XrayR/api"
+	mapset "github.com/deckarep/golang-set"
 )
 
 type RuleManager struct {
 	InboundRule         *sync.Map // Key: Tag, Value: []api.DetectRule
-	InboundDetectResult *sync.Map // key: Tag, Value: []api.DetectResult
+	InboundDetectResult *sync.Map // key: Tag, Value: mapset.NewSet []api.DetectResult
 }
 
 func New() *RuleManager {
@@ -35,13 +36,15 @@ func (r *RuleManager) UpdateRule(tag string, newRuleList []api.DetectRule) error
 }
 
 func (r *RuleManager) GetDetectResult(tag string) (*[]api.DetectResult, error) {
-	emptyDetectResult := new([]api.DetectResult)
+	detectResult := make([]api.DetectResult, 0)
 	if value, ok := r.InboundDetectResult.LoadAndDelete(tag); ok {
-		result := value.([]api.DetectResult)
-		return &result, nil
-	} else {
-		return emptyDetectResult, nil
+		resultSet := value.(mapset.Set)
+		it := resultSet.Iterator()
+		for result := range it.C {
+			detectResult = append(detectResult, result.(api.DetectResult))
+		}
 	}
+	return &detectResult, nil
 }
 
 func (r *RuleManager) Detect(tag string, destination string, email string) (reject bool) {
@@ -65,12 +68,14 @@ func (r *RuleManager) Detect(tag string, destination string, email string) (reje
 				newError(fmt.Sprintf("Record illegal behavior failed! Cannot find user's uid: %s", email)).AtDebug().WriteToLog()
 				return reject
 			}
-			detectResult := []api.DetectResult{api.DetectResult{UID: uid, RuleID: hitRuleID}}
+			newSet := mapset.NewSetWith(api.DetectResult{UID: uid, RuleID: hitRuleID})
 			// If there are any hit history
-			if v, ok := r.InboundDetectResult.LoadOrStore(tag, detectResult); ok {
-				resultList := v.([]api.DetectResult)
-				resultList = append(resultList, detectResult...)
-				r.InboundDetectResult.Store(tag, resultList)
+			if v, ok := r.InboundDetectResult.LoadOrStore(tag, newSet); ok {
+				resultSet := v.(mapset.Set)
+				// If this is a new record
+				if resultSet.Add(api.DetectResult{UID: uid, RuleID: hitRuleID}) {
+					r.InboundDetectResult.Store(tag, resultSet)
+				}
 			}
 		}
 	}
