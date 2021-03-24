@@ -68,7 +68,7 @@ type ClientInfo struct {
 
 type DetectRule struct {
 	ID      int
-	Content string
+	Pattern string
 }
 
 type DetectResult struct {

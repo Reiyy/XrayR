@@ -4,11 +4,13 @@ package mydispatcher
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/XrayR-project/XrayR/common/limiter"
+	"github.com/XrayR-project/XrayR/common/rule"
 	"github.com/xtls/xray-core/common"
 	"github.com/xtls/xray-core/common/buf"
 	"github.com/xtls/xray-core/common/log"
@@ -90,11 +92,12 @@ func (r *cachedReader) Interrupt() {
 
 // DefaultDispatcher is a default implementation of Dispatcher.
 type DefaultDispatcher struct {
-	ohm     outbound.Manager
-	router  routing.Router
-	policy  policy.Manager
-	stats   stats.Manager
-	Limiter *limiter.Limiter
+	ohm         outbound.Manager
+	router      routing.Router
+	policy      policy.Manager
+	stats       stats.Manager
+	Limiter     *limiter.Limiter
+	RuleManager *rule.RuleManager
 }
 
 func init() {
@@ -116,6 +119,7 @@ func (d *DefaultDispatcher) Init(config *Config, om outbound.Manager, router rou
 	d.policy = pm
 	d.stats = sm
 	d.Limiter = limiter.New()
+	d.RuleManager = rule.New()
 	return nil
 }
 
@@ -214,6 +218,13 @@ func (d *DefaultDispatcher) Dispatch(ctx context.Context, destination net.Destin
 	if !destination.IsValid() {
 		panic("Dispatcher: Invalid destination.")
 	}
+	// Check if domain and protocol hit the rule
+	sessionInbound := session.InboundFromContext(ctx)
+	if d.RuleManager.Detect(sessionInbound.Tag, destination.String(), sessionInbound.User.Email) {
+		newError(fmt.Sprintf("User %s access %s reject by rule", sessionInbound.User.Email, destination.String())).AtError().WriteToLog()
+		return nil, newError("destination is reject by rule")
+	}
+
 	ob := &session.Outbound{
 		Target: destination,
 	}

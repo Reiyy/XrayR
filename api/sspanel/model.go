@@ -61,3 +61,13 @@ type UserTraffic struct {
 	Upload   int64 `json:"u"`
 	Download int64 `json:"d"`
 }
+
+type RuleItem struct{
+	ID int `json:"id"`
+	Content string `json:"regex"`
+}
+
+type IllegalItem struct{
+	ID int `json:"list_id"`
+	UID int `json:"user_id"`
+}

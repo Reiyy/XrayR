@@ -151,3 +151,14 @@ func (c *Controller) GetOnlineDevice(tag string) (*[]api.OnlineUser, error) {
 	dispather := c.server.GetFeature(routing.DispatcherType()).(*mydispatcher.DefaultDispatcher)
 	return dispather.Limiter.GetOnlineDevice(tag)
 }
+
+func (c *Controller) UpdateRule(tag string, newRuleList []api.DetectRule) error {
+	dispather := c.server.GetFeature(routing.DispatcherType()).(*mydispatcher.DefaultDispatcher)
+	err := dispather.RuleManager.UpdateRule(tag, newRuleList)
+	return err
+}
+
+func (c *Controller) GetDetectResult(tag string) (*[]api.DetectResult, error) {
+	dispather := c.server.GetFeature(routing.DispatcherType()).(*mydispatcher.DefaultDispatcher)
+	return dispather.RuleManager.GetDetectResult(tag)
+}
