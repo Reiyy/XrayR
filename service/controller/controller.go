@@ -325,7 +325,7 @@ func (c *Controller) userInfoMonitor() (err error) {
 	// Get User traffic
 	userTraffic := make([]api.UserTraffic, 0)
 	for _, user := range *c.userList {
-		up, down := c.getTraffic(user.Email)
+		up, down := c.getTraffic(fmt.Sprintf("%s|%d", user.Email, user.UID))
 		if up > 0 || down > 0 {
 			userTraffic = append(userTraffic, api.UserTraffic{
 				UID:      user.UID,
