@@ -104,15 +104,12 @@ func (c *APIClient) GetNodeInfo() (nodeInfo *api.NodeInfo, err error) {
 	if err := json.Unmarshal(response.Data, nodeInfoResponse); err != nil {
 		return nil, fmt.Errorf("Unmarshal %s failed: %s", reflect.TypeOf(nodeInfoResponse), err)
 	}
-	switch nodeInfoResponse.Sort {
-	case 11:
-		c.NodeType = "V2ray"
+	switch c.NodeType {
+	case "V2ray":
 		nodeInfo, err = c.ParseV2rayNodeResponse(nodeInfoResponse)
-	case 14:
-		c.NodeType = "Trojan"
+	case "Trojan":
 		nodeInfo, err = c.ParseTrojanNodeResponse(nodeInfoResponse)
-	case 0:
-		c.NodeType = "Shadowsocks"
+	case "Shadowsocks":
 		nodeInfo, err = c.ParseSSNodeResponse(nodeInfoResponse)
 	default:
 		return nil, fmt.Errorf("Unsupported Node type: %s", c.NodeType)
