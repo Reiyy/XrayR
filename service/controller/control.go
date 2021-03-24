@@ -135,9 +135,9 @@ func (c *Controller) AddInboundLimiter(tag string, nodeSpeedLimit uint64, userLi
 	return err
 }
 
-func (c *Controller) UpdateInboundLimiter(tag string, nodeSpeedLimit uint64, updatedUserList *[]api.UserInfo) error {
+func (c *Controller) UpdateInboundLimiter(tag string, updatedUserList *[]api.UserInfo) error {
 	dispather := c.server.GetFeature(routing.DispatcherType()).(*mydispatcher.DefaultDispatcher)
-	err := dispather.Limiter.UpdateInboundLimiter(tag, nodeSpeedLimit, updatedUserList)
+	err := dispather.Limiter.UpdateInboundLimiter(tag, updatedUserList)
 	return err
 }
 

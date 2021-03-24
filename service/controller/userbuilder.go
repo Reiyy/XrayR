@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/XrayR-project/XrayR/api"
@@ -24,7 +25,7 @@ func buildVmessUser(userInfo *[]api.UserInfo, serverAlterID int) (users []*proto
 		}
 		users[i] = &protocol.User{
 			Level:   0,
-			Email:   user.Email,
+			Email:   fmt.Sprintf("%s|%d", user.Email, user.UID), // Email: email|uid
 			Account: serial.ToTypedMessage(vmessAccount.Build()),
 		}
 	}
@@ -40,7 +41,7 @@ func buildVlessUser(userInfo *[]api.UserInfo) (users []*protocol.User) {
 		}
 		users[i] = &protocol.User{
 			Level:   0,
-			Email:   user.Email,
+			Email:   fmt.Sprintf("%s|%d", user.Email, user.UID),
 			Account: serial.ToTypedMessage(vlessAccount),
 		}
 	}
@@ -56,7 +57,7 @@ func buildTrojanUser(userInfo *[]api.UserInfo) (users []*protocol.User) {
 		}
 		users[i] = &protocol.User{
 			Level:   0,
-			Email:   user.Email,
+			Email:   fmt.Sprintf("%s|%d", user.Email, user.UID),
 			Account: serial.ToTypedMessage(trojanAccount),
 		}
 	}
@@ -76,7 +77,7 @@ func buildSSUser(userInfo *[]api.UserInfo) (users []*protocol.User) {
 				}
 				users = append(users, &protocol.User{
 					Level:   0,
-					Email:   user.Email,
+					Email:   fmt.Sprintf("%s|%d", user.Email, user.UID),
 					Account: serial.ToTypedMessage(ssAccount),
 				})
 			}
