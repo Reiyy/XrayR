@@ -115,17 +115,20 @@ func (c *Controller) nodeInfoMonitor() (err error) {
 		err := c.removeOldTag(oldtag)
 		if err != nil {
 			log.Print(err)
+			return err
 		}
 		// Add new tag
 		err = c.addNewTag(newNodeInfo)
 		if err != nil {
-			log.Panic(err)
+			log.Print(err)
+			return err
 		}
 		nodeInfoChanged = true
 		c.nodeInfo = newNodeInfo
 		// Remove Old limiter
 		if err = c.DeleteInboundLimiter(oldtag); err != nil {
 			log.Print(err)
+			return err
 		}
 	}
 	// Check Cert
@@ -144,16 +147,19 @@ func (c *Controller) nodeInfoMonitor() (err error) {
 	newUserInfo, err := c.apiClient.GetUserList()
 	if err != nil {
 		log.Print(err)
+		return err
 	}
 	if nodeInfoChanged {
 		err = c.addNewUser(newUserInfo, newNodeInfo)
 		if err != nil {
 			log.Print(err)
+			return err
 		}
 		// Add Limiter
 		tag := fmt.Sprintf("%s_%d", c.nodeInfo.NodeType, c.nodeInfo.Port)
 		if err := c.AddInboundLimiter(tag, newNodeInfo.SpeedLimit, newUserInfo); err != nil {
 			log.Print(err)
+			return err
 		}
 	} else {
 		deleted, added := compareUserList(c.userList, newUserInfo)
