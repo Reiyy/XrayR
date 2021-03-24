@@ -131,8 +131,8 @@ Nodes:
 
 | 协议      | 支持情况                                             |
 | --------- | ---------------------------------------------------- |
-| VMess     | tcp, tcp+tls/xtls, ws, ws+tls/xtls, h2c, h2+tls/xtls |
-| VMessAEAD | tcp, tcp+tls/xtls, ws, ws+tls/xtls, h2c, h2+tls/xtls |
+| VMess     | tcp, tcp+tls, ws, ws+tls, h2c, h2+tls                |
+| VMessAEAD | tcp, tcp+tls, ws, ws+tls, h2c, h2+tls                |
 | VLess     | tcp, tcp+tls/xtls, ws, ws+tls/xtls, h2c, h2+tls/xtls |
 #### SSpanel-uim 节点地址格式
 ```
