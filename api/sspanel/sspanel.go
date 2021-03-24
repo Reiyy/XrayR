@@ -222,6 +222,56 @@ func (c *APIClient) ReportUserTraffic(userTraffic *[]api.UserTraffic) error {
 	return nil
 }
 
+// GetNodeRule will pull the audit rule form sspanel
+func (c *APIClient) GetNodeRule() (*[]api.DetectRule, error) {
+	path := "mod_mu/func/detect_rules"
+	res, err := c.client.R().
+		SetResult(&Response{}).
+		ForceContentType("application/json").
+		Get(path)
+
+	response, err := c.parseResponse(res, path, err)
+
+	ruleListResponse := new([]RuleItem)
+
+	if err := json.Unmarshal(response.Data, ruleListResponse); err != nil {
+		return nil, fmt.Errorf("Unmarshal %s failed: %s", reflect.TypeOf(ruleListResponse), err)
+	}
+	ruleList := make([]api.DetectRule, len(*ruleListResponse))
+	for i, r := range *ruleListResponse {
+		ruleList[i] = api.DetectRule{
+			ID:      r.ID,
+			Pattern: r.Content,
+		}
+	}
+	return &ruleList, nil
+}
+
+// ReportIllegal reports the user illegal behaviors
+func (c *APIClient) ReportIllegal(detectResultList *[]api.DetectResult) error {
+
+	data := make([]IllegalItem, len(*detectResultList))
+	for i, r := range *detectResultList {
+		data[i] = IllegalItem{
+			ID:  r.RuleID,
+			UID: r.UID,
+		}
+	}
+	postData := &PostData{Data: data}
+	path := "/mod_mu/users/detectlog"
+	res, err := c.client.R().
+		SetQueryParam("node_id", strconv.Itoa(c.NodeID)).
+		SetBody(postData).
+		SetResult(&Response{}).
+		ForceContentType("application/json").
+		Post(path)
+	_, err = c.parseResponse(res, path, err)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // ParseV2rayNodeResponse parse the response for the given nodeinfor format
 func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (*api.NodeInfo, error) {
 	var enableTLS, enableVless bool

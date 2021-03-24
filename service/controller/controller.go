@@ -68,6 +68,14 @@ func (c *Controller) Start() error {
 	if err := c.AddInboundLimiter(tag, newNodeInfo.SpeedLimit, userInfo); err != nil {
 		log.Print(err)
 	}
+	// Add Rule Manager
+	if ruleList, err := c.apiClient.GetNodeRule(); err != nil {
+		log.Printf("Get rule list filed: %s", err)
+	} else {
+		if err := c.UpdateRule(tag, *ruleList); err != nil {
+			log.Print(err)
+		}
+	}
 	c.nodeInfoMonitorPeriodic = &task.Periodic{
 		Interval: time.Duration(c.config.UpdatePeriodic) * time.Second,
 		Execute:  c.nodeInfoMonitor,
@@ -130,6 +138,15 @@ func (c *Controller) nodeInfoMonitor() (err error) {
 		if err = c.DeleteInboundLimiter(oldtag); err != nil {
 			log.Print(err)
 			return err
+		}
+	}
+	// Check Rule
+	if ruleList, err := c.apiClient.GetNodeRule(); err != nil {
+		log.Printf("Get rule list filed: %s", err)
+	} else {
+		tag := fmt.Sprintf("%s_%d", c.nodeInfo.NodeType, c.nodeInfo.Port)
+		if err := c.UpdateRule(tag, *ruleList); err != nil {
+			log.Print(err)
 		}
 	}
 	// Check Cert
@@ -326,15 +343,25 @@ func (c *Controller) userInfoMonitor() (err error) {
 
 	// Report Online info
 	tag := fmt.Sprintf("%s_%d", c.nodeInfo.NodeType, c.nodeInfo.Port)
-	onlineDevice, err := c.GetOnlineDevice(tag)
-	if err != nil {
+	if onlineDevice, err := c.GetOnlineDevice(tag); err != nil {
 		log.Print(err)
-		return nil
-	}
-	if len(*onlineDevice) > 0 {
+	} else if len(*onlineDevice) > 0 {
 		if err = c.apiClient.ReportNodeOnlineUsers(onlineDevice); err != nil {
 			log.Print(err)
+		} else {
+			log.Printf("Report %d online users", len(*onlineDevice))
 		}
+	}
+	// Report Illegal user
+	if detectResult, err := c.GetDetectResult(tag); err != nil {
+		log.Print(err)
+	} else if len(*detectResult) > 0 {
+		if err = c.apiClient.ReportIllegal(detectResult); err != nil {
+			log.Print(err)
+		} else {
+			log.Printf("Report %d illegal behaviors", len(*detectResult))
+		}
+
 	}
 	return nil
 }
