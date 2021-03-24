@@ -105,6 +105,7 @@ func (c *Controller) nodeInfoMonitor() (err error) {
 	// First fetch Node Info
 	newNodeInfo, err := c.apiClient.GetNodeInfo()
 	if err != nil {
+		log.Print(err)
 		return err
 	}
 	var nodeInfoChanged bool = false
@@ -166,7 +167,7 @@ func (c *Controller) nodeInfoMonitor() (err error) {
 		if len(deleted) > 0 {
 			deletedEmail := make([]string, len(deleted))
 			for i, u := range deleted {
-				deletedEmail[i] = u.Email
+				deletedEmail[i] = fmt.Sprintf("%s|%d", u.Email, u.UID)
 			}
 			tag := fmt.Sprintf("%s_%d", c.nodeInfo.NodeType, c.nodeInfo.Port)
 			err := c.removeUsers(deletedEmail, tag)
@@ -181,7 +182,7 @@ func (c *Controller) nodeInfoMonitor() (err error) {
 			}
 			// Update Limiter
 			tag := fmt.Sprintf("%s_%d", c.nodeInfo.NodeType, c.nodeInfo.Port)
-			if err := c.AddInboundLimiter(tag, newNodeInfo.SpeedLimit, &added); err != nil {
+			if err := c.UpdateInboundLimiter(tag, &added); err != nil {
 				log.Print(err)
 			}
 		}
