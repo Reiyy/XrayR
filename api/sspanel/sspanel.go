@@ -37,6 +37,7 @@ type APIClient struct {
 func New(apiConfig *api.Config) *APIClient {
 
 	client := resty.New()
+	client.SetRetryCount(3)
 	client.SetTimeout(5 * time.Second)
 	client.SetHostURL(apiConfig.APIHost)
 	// Create Key for each requests

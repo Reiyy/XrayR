@@ -28,7 +28,8 @@ func InboundBuilder(listenIP string, nodeInfo *api.NodeInfo, certConfig *CertCon
 	// Build Tag
 	inboundDetourConfig.Tag = fmt.Sprintf("%s_%d", nodeInfo.NodeType, nodeInfo.Port)
 	// SniffingConfig
-	sniffingConfig := &conf.SniffingConfig{Enabled: true,
+	sniffingConfig := &conf.SniffingConfig{
+		Enabled:      true,
 		DestOverride: &conf.StringList{"http", "tls"},
 	}
 	inboundDetourConfig.SniffingConfig = sniffingConfig

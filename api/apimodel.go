@@ -2,12 +2,12 @@ package api
 
 // API config
 type Config struct {
-	APIHost  string `mapstructure:"ApiHost"`
-	NodeID   int    `mapstructure:"NodeID"`
-	Key      string `mapstructure:"ApiKey"`
-	NodeType string `mapstructure:"NodeType"`
-	EnableVless bool `mapstructure:"EnableVless"`
-	EnableXTLS bool `mapstructure:"EnableXTLS"`
+	APIHost     string `mapstructure:"ApiHost"`
+	NodeID      int    `mapstructure:"NodeID"`
+	Key         string `mapstructure:"ApiKey"`
+	NodeType    string `mapstructure:"NodeType"`
+	EnableVless bool   `mapstructure:"EnableVless"`
+	EnableXTLS  bool   `mapstructure:"EnableXTLS"`
 }
 
 // Node status
@@ -64,4 +64,14 @@ type ClientInfo struct {
 	NodeID   int
 	Key      string
 	NodeType string
+}
+
+type DetectRule struct {
+	ID      int
+	Content string
+}
+
+type DetectResult struct {
+	UID    int
+	RuleID int
 }
