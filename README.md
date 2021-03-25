@@ -127,6 +127,28 @@ Nodes:
         DNSEnv: # DNS ENV option used by DNS provider
           ALICLOUD_ACCESS_KEY: aaa
           ALICLOUD_SECRET_KEY: bbb
+  -
+    PanelType: "SSpanel" # Panel type: SSpanel
+    ApiConfig:
+      ApiHost: "http://sspanel.com"
+      ApiKey: "123"
+      NodeID: 42
+      NodeType: Trojan # Node type: V2ray, Shadowsocks, Trojan
+      EnableVless: false # Enable Vless for V2ray Type, Prefer remote configuration
+      EnableXTLS: false # Enable XTLS for V2ray and Trojan， Prefer remote configuration
+    ControllerConfig:
+      ListenIP: 0.0.0.0 # IP address you want to listen
+      UpdatePeriodic: 60 # Time to update the nodeinfo, how many sec.
+      CertConfig:
+        CertMode: dns # Option about how to get certificate: none, file, http, dns. Choose "none" will forcedly disable the tls config.
+        CertDomain: "node2.test.com" # Domain to cert
+        CertFile: ./cert/node2.test.com.cert # Provided if the CertMode is file
+        KeyFile: ./cert/node2.test.com.key
+        Provider: alidns # DNS cert provider, Get the full support list here: https://go-acme.github.io/lego/dns/
+        Email: test@me.com
+        DNSEnv: # DNS ENV option used by DNS provider
+          ALICLOUD_ACCESS_KEY: aaa
+          ALICLOUD_SECRET_KEY: bbb
 ```
 ## 前端配置
 ### 限速说明
