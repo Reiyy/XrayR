@@ -15,7 +15,7 @@ import (
 
 var AEADMethod = []shadowsocks.CipherType{shadowsocks.CipherType_AES_128_GCM, shadowsocks.CipherType_AES_256_GCM, shadowsocks.CipherType_CHACHA20_POLY1305}
 
-func buildVmessUser(userInfo *[]api.UserInfo, serverAlterID int) (users []*protocol.User) {
+func buildVmessUser(tag string, userInfo *[]api.UserInfo, serverAlterID int) (users []*protocol.User) {
 	users = make([]*protocol.User, len(*userInfo))
 	for i, user := range *userInfo {
 		vmessAccount := &conf.VMessAccount{
@@ -25,14 +25,14 @@ func buildVmessUser(userInfo *[]api.UserInfo, serverAlterID int) (users []*proto
 		}
 		users[i] = &protocol.User{
 			Level:   0,
-			Email:   fmt.Sprintf("%s|%d", user.Email, user.UID), // Email: email|uid
+			Email:   fmt.Sprintf("%s|%s|%d", tag, user.Email, user.UID), // Email: InboundTag|email|uid
 			Account: serial.ToTypedMessage(vmessAccount.Build()),
 		}
 	}
 	return users
 }
 
-func buildVlessUser(userInfo *[]api.UserInfo) (users []*protocol.User) {
+func buildVlessUser(tag string, userInfo *[]api.UserInfo) (users []*protocol.User) {
 	users = make([]*protocol.User, len(*userInfo))
 	for i, user := range *userInfo {
 		vlessAccount := &vless.Account{
@@ -41,14 +41,14 @@ func buildVlessUser(userInfo *[]api.UserInfo) (users []*protocol.User) {
 		}
 		users[i] = &protocol.User{
 			Level:   0,
-			Email:   fmt.Sprintf("%s|%d", user.Email, user.UID),
+			Email:   fmt.Sprintf("%s|%s|%d", tag, user.Email, user.UID),
 			Account: serial.ToTypedMessage(vlessAccount),
 		}
 	}
 	return users
 }
 
-func buildTrojanUser(userInfo *[]api.UserInfo) (users []*protocol.User) {
+func buildTrojanUser(tag string, userInfo *[]api.UserInfo) (users []*protocol.User) {
 	users = make([]*protocol.User, len(*userInfo))
 	for i, user := range *userInfo {
 		trojanAccount := &trojan.Account{
@@ -57,14 +57,14 @@ func buildTrojanUser(userInfo *[]api.UserInfo) (users []*protocol.User) {
 		}
 		users[i] = &protocol.User{
 			Level:   0,
-			Email:   fmt.Sprintf("%s|%d", user.Email, user.UID),
+			Email:   fmt.Sprintf("%s|%s|%d", tag, user.Email, user.UID),
 			Account: serial.ToTypedMessage(trojanAccount),
 		}
 	}
 	return users
 }
 
-func buildSSUser(userInfo *[]api.UserInfo) (users []*protocol.User) {
+func buildSSUser(tag string, userInfo *[]api.UserInfo) (users []*protocol.User) {
 	users = make([]*protocol.User, 0)
 	for _, user := range *userInfo {
 		// Check if the cypher method is AEAD
@@ -77,7 +77,7 @@ func buildSSUser(userInfo *[]api.UserInfo) (users []*protocol.User) {
 				}
 				users = append(users, &protocol.User{
 					Level:   0,
-					Email:   fmt.Sprintf("%s|%d", user.Email, user.UID),
+					Email:   fmt.Sprintf("%s|%s|%d", tag, user.Email, user.UID),
 					Account: serial.ToTypedMessage(ssAccount),
 				})
 			}
