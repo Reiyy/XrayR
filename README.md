@@ -47,7 +47,7 @@ A Xray backend framework that can easily support many panels.
 | 审计规则        | √     | √      | √           |
 | 节点端口限速    | √     | √      | √           |
 | 按照用户限速    | √     | √      | √           |
-
+| 自定义DNS       | √     | √      | √           |
 ## 支持前端
 
 | 前端        | v2ray | trojan | shadowsocks                    |
@@ -104,6 +104,7 @@ Log:
   Level: debug # Log level: none, error, warning, info, debug 
   AccessPath: # ./access.Log
   ErrorPath: # ./error.log
+DnsConfigPath: ./dns.json # Path to dns config
 Nodes:
   -
     PanelType: "SSpanel" # Panel type: SSpanel
@@ -117,6 +118,7 @@ Nodes:
     ControllerConfig:
       ListenIP: 0.0.0.0 # IP address you want to listen
       UpdatePeriodic: 60 # Time to update the nodeinfo, how many sec.
+      EnableDNS: false # Enable custom DNS config, Please ensure that you set the dns.json well
       CertConfig:
         CertMode: dns # Option about how to get certificate: none, file, http, dns. Choose "none" will forcedly disable the tls config.
         CertDomain: "node1.test.com" # Domain to cert
@@ -139,6 +141,7 @@ Nodes:
     ControllerConfig:
       ListenIP: 0.0.0.0 # IP address you want to listen
       UpdatePeriodic: 60 # Time to update the nodeinfo, how many sec.
+      EnableDNS: false # Enable custom DNS config, Please ensure that you set the dns.json well
       CertConfig:
         CertMode: dns # Option about how to get certificate: none, file, http, dns. Choose "none" will forcedly disable the tls config.
         CertDomain: "node2.test.com" # Domain to cert
@@ -157,6 +160,11 @@ Nodes:
 3. 限速值设为0，则为不限速。
 ### 审计规则说明
 请在前端审计规则处填写任意正则表达式，如 `baidu.com`将屏蔽所有baidu的域名。暂不支持bt协议的审计。
+### 自定义DNS配置
+XrayR支持为不同节点设置不同的DNS策略，具体方法如下：
+1. 编写dns.json文件，此配置与Xray DNS配置完全相同，请查看：https://xtls.github.io/config/base/dns/ 获取帮助。
+2. 在`config.yml`中配置`DnsConfigPath`为dns.json的路径。
+3. 在所需要启用自定义DNS的节点中，将`EnableDNS: true`设为true。如设为false或者不填则是使用本机DNS。
 ### V2ray
 
 | 协议      | 支持情况                                             |
