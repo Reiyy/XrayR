@@ -10,13 +10,17 @@ import (
 )
 
 //OutboundBuilder build freedom outbund config for addoutbound
-func OutboundBuilder(nodeInfo *api.NodeInfo) (*core.OutboundHandlerConfig, error) {
+func OutboundBuilder(nodeInfo *api.NodeInfo, EnableDNS bool) (*core.OutboundHandlerConfig, error) {
 	outboundDetourConfig := &conf.OutboundDetourConfig{}
 	outboundDetourConfig.Protocol = "freedom"
 	outboundDetourConfig.Tag = fmt.Sprintf("%s_%d", nodeInfo.NodeType, nodeInfo.Port)
 	// Protocol setting
+	var dnsSettings string = "Asis"
+	if EnableDNS {
+		dnsSettings = "UseIP"
+	}
 	proxySetting := &conf.FreedomConfig{
-		DomainStrategy: "Asis",
+		DomainStrategy: dnsSettings,
 	}
 	var setting json.RawMessage
 	setting, err := json.Marshal(proxySetting)

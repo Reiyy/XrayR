@@ -230,7 +230,7 @@ func (c *Controller) addNewTag(newNodeInfo *api.NodeInfo) (err error) {
 
 		return err
 	}
-	outBoundConfig, err := OutboundBuilder(newNodeInfo)
+	outBoundConfig, err := OutboundBuilder(newNodeInfo, c.config.EnableDNS)
 	if err != nil {
 
 		return err

@@ -1,6 +1,8 @@
 package panel
 
 import (
+	"encoding/json"
+	io "io/ioutil"
 	"log"
 	"sync"
 
@@ -31,12 +33,27 @@ func New(panelConfig *Config) *Panel {
 	return p
 }
 
-func (p *Panel) loadCore(c *LogConfig) *core.Instance {
+func (p *Panel) loadCore(panelConfig *Config) *core.Instance {
 	// Log Config
 	logConfig := &conf.LogConfig{
-		LogLevel:  c.Level,
-		AccessLog: c.AccessPath,
-		ErrorLog:  c.ErrorPath,
+		LogLevel:  panelConfig.LogConfig.Level,
+		AccessLog: panelConfig.LogConfig.AccessPath,
+		ErrorLog:  panelConfig.LogConfig.ErrorPath,
+	}
+	// DNS config
+	dnsConfig := &conf.DNSConfig{}
+	if panelConfig.DnsConfigPath != "" {
+		if data, err := io.ReadFile(panelConfig.DnsConfigPath); err != nil {
+			log.Panicf("Failed to read dns.json at: %s", panelConfig.DnsConfigPath)
+		} else {
+			if err = json.Unmarshal(data, dnsConfig); err != nil {
+				log.Panicf("Failed to unmarshal dns.json")
+			}
+		}
+	}
+	dConfig, err := dnsConfig.Build()
+	if err != nil {
+		log.Panicf("Failed to understand dns.json, Please check: https://xtls.github.io/config/base/dns/ for help: %s", err)
 	}
 	policyConfig := &conf.PolicyConfig{}
 	policyConfig.Levels = map[uint32]*conf.Policy{0: &conf.Policy{
@@ -52,6 +69,7 @@ func (p *Panel) loadCore(c *LogConfig) *core.Instance {
 			serial.ToTypedMessage(&proxyman.InboundConfig{}),
 			serial.ToTypedMessage(&proxyman.OutboundConfig{}),
 			serial.ToTypedMessage(pConfig),
+			serial.ToTypedMessage(dConfig),
 		},
 	}
 	server, err := core.New(config)
@@ -69,7 +87,7 @@ func (p *Panel) Start() {
 	defer p.access.Unlock()
 	log.Print("Start the panel..")
 	// Load Core
-	server := p.loadCore(p.panelConfig.LogConfig)
+	server := p.loadCore(p.panelConfig)
 	if err := server.Start(); err != nil {
 		log.Panicf("Failed to start instance: %s", err)
 	}
