@@ -220,9 +220,12 @@ func (d *DefaultDispatcher) Dispatch(ctx context.Context, destination net.Destin
 	}
 	// Check if domain and protocol hit the rule
 	sessionInbound := session.InboundFromContext(ctx)
-	if d.RuleManager.Detect(sessionInbound.Tag, destination.String(), sessionInbound.User.Email) {
-		newError(fmt.Sprintf("User %s access %s reject by rule", sessionInbound.User.Email, destination.String())).AtError().WriteToLog()
-		return nil, newError("destination is reject by rule")
+	// Whether the inbound connection contains a user
+	if sessionInbound.User != nil {
+		if d.RuleManager.Detect(sessionInbound.Tag, destination.String(), sessionInbound.User.Email) {
+			newError(fmt.Sprintf("User %s access %s reject by rule", sessionInbound.User.Email, destination.String())).AtError().WriteToLog()
+			return nil, newError("destination is reject by rule")
+		}
 	}
 
 	ob := &session.Outbound{

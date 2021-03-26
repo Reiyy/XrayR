@@ -22,7 +22,7 @@ var (
 )
 
 var (
-	version  = "0.3.3"
+	version  = "0.4.3"
 	codename = "XrayR"
 	intro    = "A Xray backend that supports many panels"
 )
@@ -43,6 +43,9 @@ func getConfig() *viper.Viper {
 		config.SetConfigName(configNameOnly)
 		config.SetConfigType(strings.TrimPrefix(configFileExt, "."))
 		config.AddConfigPath(configPath)
+		// Set ASSET Path and Config Path for XrayR
+		os.Setenv("XRAY_LOCATION_ASSET", configPath)
+		os.Setenv("XRAY_LOCATION_CONFIG", configPath)
 	} else {
 		// Set default config path
 		config.SetConfigName("config")
