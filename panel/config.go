@@ -6,8 +6,9 @@ import (
 )
 
 type Config struct {
-	LogConfig   *LogConfig     `mapstructure:"Log"`
-	NodesConfig []*NodesConfig `mapstructure:"Nodes"`
+	LogConfig     *LogConfig     `mapstructure:"Log"`
+	DnsConfigPath string         `mapstructure:"DnsConfigPath"`
+	NodesConfig   []*NodesConfig `mapstructure:"Nodes"`
 }
 
 type NodesConfig struct {
