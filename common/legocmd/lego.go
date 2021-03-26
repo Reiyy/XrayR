@@ -15,6 +15,7 @@ import (
 )
 
 var version = "dev"
+var defaultPath string
 
 type LegoCMD struct {
 	cmdClient *cli.App
@@ -32,7 +33,6 @@ func New() (*LegoCMD, error) {
 		fmt.Printf("lego version %s %s/%s\n", c.App.Version, runtime.GOOS, runtime.GOARCH)
 	}
 
-	var defaultPath string
 	cwd, err := os.Getwd()
 	if err == nil {
 		defaultPath = filepath.Join(cwd, ".lego")
@@ -44,10 +44,6 @@ func New() (*LegoCMD, error) {
 
 	app.Commands = cmd.CreateCommands()
 
-	// err = app.Run(args)
-	if err != nil {
-		return nil, err
-	}
 	lego := &LegoCMD{
 		cmdClient: app,
 	}
@@ -126,8 +122,8 @@ func (l *LegoCMD) RenewCert(domain, email, certMode, provider string, DNSEnv map
 	return CertPath, KeyPath, nil
 }
 func checkCertfile(domain string) (string, string, error) {
-	keyPath := path.Join(".lego", "certificates", fmt.Sprintf("%s.key", domain))
-	certPath := path.Join(".lego", "certificates", fmt.Sprintf("%s.crt", domain))
+	keyPath := path.Join(defaultPath, "certificates", fmt.Sprintf("%s.key", domain))
+	certPath := path.Join(defaultPath, "certificates", fmt.Sprintf("%s.crt", domain))
 	if _, err := os.Stat(keyPath); os.IsNotExist(err) {
 		return "", "", fmt.Errorf("Cert key failed: %s", domain)
 	}
