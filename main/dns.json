@@ -5,16 +5,6 @@
     "servers": [
         "8.8.8.8",
         "8.8.4.4",
-        {
-            "address": "1.2.3.4",
-            "port": 5353,
-            "domains": [
-                "domain:xray.com"
-            ],
-            "expectIPs": [
-                "geoip:cn"
-            ]
-        },
         "localhost"
     ],
     "clientIp": "1.2.3.4",
