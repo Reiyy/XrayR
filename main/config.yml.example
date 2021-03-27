@@ -16,7 +16,7 @@ Nodes:
     ControllerConfig:
       ListenIP: 0.0.0.0 # IP address you want to listen
       UpdatePeriodic: 60 # Time to update the nodeinfo, how many sec.
-      EnableDNS: true # Use custom DNS config, Please ensure that you set the dns.json well
+      EnableDNS: false # Use custom DNS config, Please ensure that you set the dns.json well
       CertConfig:
         CertMode: dns # Option about how to get certificate: none, file, http, dns. Choose "none" will forcedly disable the tls config.
         CertDomain: "node1.test.com" # Domain to cert
