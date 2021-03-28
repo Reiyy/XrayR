@@ -104,7 +104,7 @@ Log:
   Level: debug # Log level: none, error, warning, info, debug 
   AccessPath: # ./access.Log
   ErrorPath: # ./error.log
-DnsConfigPath: ./dns.json # Path to dns config
+DnsConfigPath: # ./dns.json  Path to dns config
 Nodes:
   -
     PanelType: "SSpanel" # Panel type: SSpanel
