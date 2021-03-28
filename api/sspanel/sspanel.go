@@ -273,7 +273,7 @@ func (c *APIClient) ReportIllegal(detectResultList *[]api.DetectResult) error {
 func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (*api.NodeInfo, error) {
 	var enableTLS, enableVless bool
 	enableVless = c.EnableVless
-	var path, host string
+	var path, host, TLStype, transportProtocol string
 	if nodeInfoResponse.RawServerString == "" {
 		return nil, fmt.Errorf("No server info in response")
 	}
@@ -287,16 +287,16 @@ func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (
 	if err != nil {
 		return nil, err
 	}
-
-	transportProtocol := serverConf[3]
-
-	TLStype := serverConf[4]
-	if TLStype == "tls" || TLStype == "xtls" {
-		enableTLS = true
-	} else {
-		enableTLS = false
+	// Compatible with more node types config
+	for _, value := range serverConf[3:5] {
+		switch value {
+			case "tls", "xtls":
+				TLStype = value
+				enableTLS = true
+			default: 
+				transportProtocol = value
+		}
 	}
-
 	extraServerConf := strings.Split(serverConf[5], "|")
 
 	for _, item := range extraServerConf {
