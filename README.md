@@ -1,4 +1,4 @@
-# XRayR
+# XrayR
 [![](https://img.shields.io/badge/TgChat-@XrayR讨论-blue.svg)](https://t.me/XrayR_project)
 [![](https://img.shields.io/badge/Channel-@XrayR通知-blue.svg)](https://t.me/XrayR_channel)
 
@@ -259,5 +259,7 @@ ip;443;2;tls;ws;path=/xxx|server=域名|host=CDN域名
 ```
 示例：gz.aaa.com;12345;server=gz.aaa.com
 ```
+## Stargazers over time
 
+[![Stargazers over time](https://starchart.cc/XrayR-project/XrayR.svg)](https://starchart.cc/XrayR-project/XrayR)
 
