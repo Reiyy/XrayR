@@ -290,11 +290,13 @@ func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (
 	// Compatible with more node types config
 	for _, value := range serverConf[3:5] {
 		switch value {
-			case "tls", "xtls":
-				TLStype = value
-				enableTLS = true
-			default: 
+		case "tls", "xtls":
+			TLStype = value
+			enableTLS = true
+		default:
+			if value != "" {
 				transportProtocol = value
+			}
 		}
 	}
 	extraServerConf := strings.Split(serverConf[5], "|")
