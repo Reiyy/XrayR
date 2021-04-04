@@ -8,6 +8,7 @@ type Config struct {
 	NodeType    string `mapstructure:"NodeType"`
 	EnableVless bool   `mapstructure:"EnableVless"`
 	EnableXTLS  bool   `mapstructure:"EnableXTLS"`
+	Timeout     int    `mapstructure:"Timeout"`
 }
 
 // Node status
