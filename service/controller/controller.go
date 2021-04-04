@@ -116,16 +116,16 @@ func (c *Controller) nodeInfoMonitor() (err error) {
 	newNodeInfo, err := c.apiClient.GetNodeInfo()
 	if err != nil {
 		log.Print(err)
-		return err
+		return nil
 	}
-
+	
 	// Update User
 	newUserInfo, err := c.apiClient.GetUserList()
 	if err != nil {
 		log.Print(err)
-		return err
+		return nil
 	}
-	
+
 	var nodeInfoChanged bool = false
 	// If nodeInfo changed
 	if !reflect.DeepEqual(c.nodeInfo, newNodeInfo) {
@@ -134,13 +134,13 @@ func (c *Controller) nodeInfoMonitor() (err error) {
 		err := c.removeOldTag(oldtag)
 		if err != nil {
 			log.Print(err)
-			return err
+			return nil
 		}
 		// Add new tag
 		err = c.addNewTag(newNodeInfo)
 		if err != nil {
 			log.Print(err)
-			return err
+			return nil
 		}
 		nodeInfoChanged = true
 		c.nodeInfo = newNodeInfo
@@ -148,9 +148,10 @@ func (c *Controller) nodeInfoMonitor() (err error) {
 		// Remove Old limiter
 		if err = c.DeleteInboundLimiter(oldtag); err != nil {
 			log.Print(err)
-			return err
+			return nil
 		}
 	}
+
 	// Check Rule
 	if ruleList, err := c.apiClient.GetNodeRule(); err != nil {
 		log.Printf("Get rule list filed: %s", err)
@@ -159,6 +160,7 @@ func (c *Controller) nodeInfoMonitor() (err error) {
 			log.Print(err)
 		}
 	}
+
 	// Check Cert
 	if c.nodeInfo.EnableTLS && (c.config.CertConfig.CertMode == "dns" || c.config.CertConfig.CertMode == "http") {
 		lego, err := legocmd.New()
@@ -176,12 +178,12 @@ func (c *Controller) nodeInfoMonitor() (err error) {
 		err = c.addNewUser(newUserInfo, newNodeInfo)
 		if err != nil {
 			log.Print(err)
-			return err
+			return nil
 		}
 		// Add Limiter
 		if err := c.AddInboundLimiter(c.Tag, newNodeInfo.SpeedLimit, newUserInfo); err != nil {
 			log.Print(err)
-			return err
+			return nil
 		}
 	} else {
 		deleted, added := compareUserList(c.userList, newUserInfo)
