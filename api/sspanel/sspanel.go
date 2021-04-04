@@ -3,6 +3,7 @@ package sspanel
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -38,7 +39,18 @@ func New(apiConfig *api.Config) *APIClient {
 
 	client := resty.New()
 	client.SetRetryCount(3)
-	client.SetTimeout(5 * time.Second)
+	if apiConfig.Timeout > 0 {
+		client.SetTimeout(time.Duration(apiConfig.Timeout) * time.Second)
+	} else {
+		client.SetTimeout(5 * time.Second)
+	}
+	client.OnError(func(req *resty.Request, err error) {
+		if v, ok := err.(*resty.ResponseError); ok {
+			// v.Response contains the last response from the server
+			// v.Err contains the original error
+			log.Print(v.Err)
+		}
+	})
 	client.SetHostURL(apiConfig.APIHost)
 	// Create Key for each requests
 	client.SetQueryParam("key", apiConfig.Key)

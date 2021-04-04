@@ -118,6 +118,14 @@ func (c *Controller) nodeInfoMonitor() (err error) {
 		log.Print(err)
 		return err
 	}
+
+	// Update User
+	newUserInfo, err := c.apiClient.GetUserList()
+	if err != nil {
+		log.Print(err)
+		return err
+	}
+	
 	var nodeInfoChanged bool = false
 	// If nodeInfo changed
 	if !reflect.DeepEqual(c.nodeInfo, newNodeInfo) {
@@ -163,12 +171,7 @@ func (c *Controller) nodeInfoMonitor() (err error) {
 			log.Print(err)
 		}
 	}
-	// Update User
-	newUserInfo, err := c.apiClient.GetUserList()
-	if err != nil {
-		log.Print(err)
-		return err
-	}
+
 	if nodeInfoChanged {
 		err = c.addNewUser(newUserInfo, newNodeInfo)
 		if err != nil {
