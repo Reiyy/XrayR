@@ -52,7 +52,7 @@ A Xray backend framework that can easily support many panels.
 
 | 前端        | v2ray | trojan | shadowsocks                    |
 | ----------- | ----- | ------ | ------------------------------ |
-| sspanel-uim | √     | √      | √ (Shadowsocks - V2Ray-Plugin) |
+| sspanel-uim | √     | √      | √ (Shadowsocks - 单端口多用户) |
 | ProxyPanel  | TODO  | TODO   | TODO                           |
 | v2board     | TODO  | TODO   | TODO                           |
 
@@ -251,14 +251,15 @@ ip;443;2;tls;ws;path=/xxx|server=域名|host=CDN域名
 | --------------- | -------- | ------------------------------------------- |
 | ShadowsocksAEAD | √        | aes-128-gcm, aes-256-gcm, chacha20-poly1305 |
 #### SSpanel-uim 节点地址格式
-请注意，节点类型请选择：`Shadowsocks - V2Ray-Plugin`
-（实验性配置，下个版本会切换成单端口多用户）
+* 请注意，节点类型请选择：`Shadowsocks`
+* 单端口多用户承载用户加密方式请选择：`aes-128-gcm`, `aes-256-gcm`, `chacha20-ietf-poly1305`三者之一。
+* XrayR目前只支持一个单端口多用户承载用户，有多个承载用户时只使用第一个。
 ```
-域名或IP;监听端口;server=xx
+域名或IP;port=监听端口#连接端口;server=xx
 ```
 #### Shadowsocks 示例
 ```
-示例：gz.aaa.com;12345;server=gz.aaa.com
+示例：gz.aaa.com;port=80#1234;server=gz.aaa.com
 ```
 ## Stargazers over time
 

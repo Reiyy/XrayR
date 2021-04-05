@@ -118,7 +118,7 @@ func (c *Controller) nodeInfoMonitor() (err error) {
 		log.Print(err)
 		return nil
 	}
-	
+
 	// Update User
 	newUserInfo, err := c.apiClient.GetUserList()
 	if err != nil {
@@ -259,7 +259,7 @@ func (c *Controller) addNewUser(userInfo *[]api.UserInfo, nodeInfo *api.NodeInfo
 	} else if nodeInfo.NodeType == "Trojan" {
 		users = buildTrojanUser(c.Tag, userInfo)
 	} else if nodeInfo.NodeType == "Shadowsocks" {
-		users = buildSSUser(c.Tag, userInfo)
+		users = buildSSUser(c.Tag, userInfo, nodeInfo.CypherMethod)
 	} else {
 		return fmt.Errorf("Unsupported node type: %s", nodeInfo.NodeType)
 	}
