@@ -65,6 +65,7 @@ func InboundBuilder(listenIP string, nodeInfo *api.NodeInfo, certConfig *CertCon
 		}
 		proxySetting, _ := proxySetting.(*conf.ShadowsocksServerConfig)
 		proxySetting.Users = append(proxySetting.Users, defaultSSuser)
+		proxySetting.NetworkList = &conf.NetworkList{"tcp", "udp"}
 	} else {
 		return nil, fmt.Errorf("Unsupported node type: %s, Only support: V2ray, Trojan, and Shadowsocks", nodeInfo.NodeType)
 	}
