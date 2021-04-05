@@ -5,15 +5,15 @@ Log:
 DnsConfigPath: # ./dns.json Path to dns config 
 Nodes:
   -
-    PanelType: "SSpanel" # Panel type: SSpanel
+    PanelType: "SSpanel" # Panel type: SSpanel, V2board
     ApiConfig:
       ApiHost: "http://127.0.0.1:667"
       ApiKey: "123"
       NodeID: 41
       NodeType: V2ray # Node type: V2ray, Shadowsocks, Trojan
       Timeout: 30 # Timeout for the api request
-      EnableVless: false # Enable Vless for V2ray Type, Prefer remote configuration
-      EnableXTLS: false # Enable XTLS for V2ray and Trojan， Prefer remote configuration
+      EnableVless: false # Enable Vless for V2ray Type, Remote configuration first
+      EnableXTLS: false # Enable XTLS for V2ray and Trojan, emote configuration first
     ControllerConfig:
       ListenIP: 0.0.0.0 # IP address you want to listen
       UpdatePeriodic: 60 # Time to update the nodeinfo, how many sec.
@@ -29,14 +29,19 @@ Nodes:
           ALICLOUD_ACCESS_KEY: aaa
           ALICLOUD_SECRET_KEY: bbb
   # -
-  #   PanelType: "SSpanel" # Panel type: SSpanel
+  #   PanelType: "V2board" # Panel type: SSpanel, V2board
   #   ApiConfig:
-  #     ApiHost: "http://127.0.0.1:667"
+  #     ApiHost: "http://127.0.0.1:668"
   #     ApiKey: "123"
   #     NodeID: 4
   #     NodeType: Shadowsocks # Node type: V2ray, Shadowsocks, Trojan
+  #     Timeout: 30 # Timeout for the api request
+  #     EnableVless: false # Enable Vless for V2ray Type, Remote configuration first
+  #     EnableXTLS: false # Enable XTLS for V2ray and Trojan, emote configuration first
   #   ControllerConfig:
+  #     ListenIP: 0.0.0.0 # IP address you want to listen
   #     UpdatePeriodic: 10 # Time to update the nodeinfo, how many sec.
+  #     EnableDNS: false # Use custom DNS config, Please ensure that you set the dns.json well
   #     CertConfig:
   #       CertMode: dns # Option about how to get certificate: none, file, http, dns
   #       CertDomain: "node1.test.com" # Domain to cert

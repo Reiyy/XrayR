@@ -47,6 +47,7 @@ type UserInfo struct {
 	Obfs          string
 	ObfsParam     string
 	UUID          string
+	AlterID       int
 }
 
 type OnlineUser struct {
