@@ -8,6 +8,7 @@ import (
 
 	"github.com/XrayR-project/XrayR/api"
 	"github.com/XrayR-project/XrayR/api/sspanel"
+	"github.com/XrayR-project/XrayR/api/v2board"
 	"github.com/XrayR-project/XrayR/app/mydispatcher"
 	_ "github.com/XrayR-project/XrayR/main/distro/all"
 	"github.com/XrayR-project/XrayR/service"
@@ -95,9 +96,12 @@ func (p *Panel) Start() {
 	// Load Nodes config
 	for _, nodeConfig := range p.panelConfig.NodesConfig {
 		var apiClient api.API
-		if nodeConfig.PanelType == "SSpanel" {
+		switch nodeConfig.PanelType {
+		case "SSpanel":
 			apiClient = sspanel.New(nodeConfig.ApiConfig)
-		} else {
+		case "V2board":
+			apiClient = v2board.New(nodeConfig.ApiConfig)
+		default:
 			log.Panicf("Unsupport panel type: %s", nodeConfig.PanelType)
 		}
 		var controllerService service.Service

@@ -30,7 +30,7 @@ A Xray backend framework that can easily support many panels.
 - [x] 限速实现
 - [x] 审计规则
 - [ ] 对接ProxyPanel
-- [ ] 对接v2board
+- [x] 对接v2board
 
 ## 功能介绍
 
@@ -54,7 +54,7 @@ A Xray backend framework that can easily support many panels.
 | ----------- | ----- | ------ | ------------------------------ |
 | sspanel-uim | √     | √      | √ (Shadowsocks - 单端口多用户) |
 | ProxyPanel  | TODO  | TODO   | TODO                           |
-| v2board     | TODO  | TODO   | TODO                           |
+| v2board     | √     | √      | √                              |
 
 ## Thanks
 
@@ -99,7 +99,7 @@ go build -o XrayR -ldflags "-s -w"
 2. nano config.yml
 
 配置文件基本格式，Nodes下可以同时添加多个面板，多个节点配置信息，只需添加相同格式的Nodes item即可。
-```
+``` yaml
 Log:
   Level: debug # Log level: none, error, warning, info, debug 
   AccessPath: # ./access.Log
@@ -131,12 +131,13 @@ Nodes:
           ALICLOUD_ACCESS_KEY: aaa
           ALICLOUD_SECRET_KEY: bbb
   -
-    PanelType: "SSpanel" # Panel type: SSpanel
+    PanelType: "V2board" # Panel type: SSpanel, V2board
     ApiConfig:
-      ApiHost: "http://sspanel.com"
+      ApiHost: "http://V2board.com"
       ApiKey: "123"
       NodeID: 42
       NodeType: Trojan # Node type: V2ray, Shadowsocks, Trojan
+      Timeout: 30 # Timeout for the api request
       EnableVless: false # Enable Vless for V2ray Type, Prefer remote configuration
       EnableXTLS: false # Enable XTLS for V2ray and Trojan， Prefer remote configuration
     ControllerConfig:
@@ -167,6 +168,11 @@ XrayR支持为不同节点设置不同的DNS策略，具体方法如下：
 2. 在`config.yml`中配置`DnsConfigPath`为dns.json的路径。
 3. 在所需要启用自定义DNS的节点中，将`EnableDNS: true`设为true。如设为false或者不填则是使用本机DNS。
 4. 如果要启用geoip相关配置，请确保`geoip.dat`和`geosite.dat`处于和`config.yml`同一目录。
+
+### V2board 支持
+1. 在`config.yml`中配置`PanelType: "V2board"`。
+2. V2board只有V2ray节点类型支持审计规则。
+3. 启用vless和xtls，请在配置文件中手动启动，V2board不支持在线配置。
 ### V2ray
 
 | 协议      | 支持情况                                             |
