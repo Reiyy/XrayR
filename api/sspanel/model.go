@@ -30,6 +30,7 @@ type UserResponse struct {
 	ForbiddenIP   string `json:"forbidden_ip"`
 	ForbiddenPort string `json:"forbidden_port"`
 	UUID          string `json:"uuid"`
+	MultiUser     int    `json:"is_multi_user"`
 }
 
 // Response is the common response
@@ -62,12 +63,12 @@ type UserTraffic struct {
 	Download int64 `json:"d"`
 }
 
-type RuleItem struct{
-	ID int `json:"id"`
+type RuleItem struct {
+	ID      int    `json:"id"`
 	Content string `json:"regex"`
 }
 
-type IllegalItem struct{
-	ID int `json:"list_id"`
+type IllegalItem struct {
+	ID  int `json:"list_id"`
 	UID int `json:"user_id"`
 }

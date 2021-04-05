@@ -31,6 +31,7 @@ type NodeInfo struct {
 	EnableTLS         bool
 	TLSType           string
 	EnableVless       bool
+	CypherMethod      string
 }
 
 type UserInfo struct {

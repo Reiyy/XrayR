@@ -355,16 +355,35 @@ func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (
 
 // ParseSSNodeResponse parse the response for the given nodeinfor format
 func (c *APIClient) ParseSSNodeResponse(nodeInfoResponse *NodeInfoResponse) (*api.NodeInfo, error) {
+	var port int = 0
+	var method string
+	path := "/mod_mu/users"
+	res, err := c.client.R().
+		SetQueryParam("node_id", strconv.Itoa(c.NodeID)).
+		SetResult(&Response{}).
+		ForceContentType("application/json").
+		Get(path)
 
-	if nodeInfoResponse.RawServerString == "" {
-		return nil, fmt.Errorf("No server info in response")
+	response, err := c.parseResponse(res, path, err)
+
+	userListResponse := new([]UserResponse)
+
+	if err := json.Unmarshal(response.Data, userListResponse); err != nil {
+		return nil, fmt.Errorf("Unmarshal %s failed: %s", reflect.TypeOf(userListResponse), err)
 	}
-	//nodeInfo.RawServerString = strings.ToLower(nodeInfo.RawServerString)
-	serverConf := strings.Split(nodeInfoResponse.RawServerString, ";")
-	port, err := strconv.Atoi(serverConf[1])
-	if err != nil {
-		return nil, err
+	// Find the multi-user
+	for _, u := range *userListResponse {
+		if u.MultiUser > 0 {
+			port = u.Port
+			method = u.Method
+			break
+		}
 	}
+
+	if port == 0 || method == "" {
+		return nil, fmt.Errorf("Cant find the single port multi user")
+	}
+
 	speedlimit := (nodeInfoResponse.SpeedLimit * 1000000) / 8
 	// Create GeneralNodeInfo
 	nodeinfo := &api.NodeInfo{
@@ -373,6 +392,7 @@ func (c *APIClient) ParseSSNodeResponse(nodeInfoResponse *NodeInfoResponse) (*ap
 		Port:              port,
 		SpeedLimit:        speedlimit,
 		TransportProtocol: "tcp",
+		CypherMethod:      method,
 	}
 
 	return nodeinfo, nil
