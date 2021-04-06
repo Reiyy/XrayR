@@ -73,6 +73,11 @@ A Xray backend framework that can easily support many panels.
 
 [XrayR通知](https://t.me/XrayR_channel)
 
+## Donation
+ETH&(USDT-ERC20): 0xDbB76DDDaAef7F14e56Be96CF5cd477BBDA6FFd6
+
+TRX&(USDT-TRC20): THnoBdGW8W8tkCgATAbfTtEWV7jH3dz1dZ
+
 # 一键安装
 ```
 bash <(curl -Ls https://raw.githubusercontent.com/XrayR-project/XrayR-release/master/install.sh)
