@@ -84,6 +84,13 @@ ETH&(USDT-ERC20): 0xDbB76DDDaAef7F14e56Be96CF5cd477BBDA6FFd6
 
 TRX&(USDT-TRC20): THnoBdGW8W8tkCgATAbfTtEWV7jH3dz1dZ
 
+### Sponsors
+| Time            | Name | Amount |
+| --------------- | ----- | ------ |
+| 2021/05/27     | Tg: @Bobs9 | 30usdt |
+| 2021/05/27     | Anonymous  | 30usdt |
+| 2021/05/27     | Anonymous  | 8usdt |
+
 
 ## Stargazers over time
 
