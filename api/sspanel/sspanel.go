@@ -331,7 +331,7 @@ func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (
 			host = value
 		}
 	}
-	speedlimit := (nodeInfoResponse.SpeedLimit * 1000000) / 8
+	speedlimit := uint64((nodeInfoResponse.SpeedLimit * 1000000) / 8)
 	// Create GeneralNodeInfo
 	nodeinfo := &api.NodeInfo{
 		NodeType:          c.NodeType,
@@ -381,7 +381,7 @@ func (c *APIClient) ParseSSNodeResponse(nodeInfoResponse *NodeInfoResponse) (*ap
 		return nil, fmt.Errorf("Cant find the single port multi user")
 	}
 
-	speedlimit := (nodeInfoResponse.SpeedLimit * 1000000) / 8
+	speedlimit := uint64((nodeInfoResponse.SpeedLimit * 1000000) / 8)
 	// Create GeneralNodeInfo
 	nodeinfo := &api.NodeInfo{
 		NodeType:          c.NodeType,
@@ -430,7 +430,7 @@ func (c *APIClient) ParseTrojanNodeResponse(nodeInfoResponse *NodeInfoResponse) 
 	if err != nil {
 		return nil, err
 	}
-	speedlimit := (nodeInfoResponse.SpeedLimit * 1000000) / 8
+	speedlimit := uint64((nodeInfoResponse.SpeedLimit * 1000000) / 8)
 	// Create GeneralNodeInfo
 	nodeinfo := &api.NodeInfo{
 		NodeType:          c.NodeType,
@@ -455,7 +455,7 @@ func (c *APIClient) ParseUserListResponse(userInfoResponse *[]UserResponse) (*[]
 			Email:         user.Email,
 			UUID:          user.UUID,
 			Passwd:        user.Passwd,
-			SpeedLimit:    (user.SpeedLimit * 1000000) / 8,
+			SpeedLimit:    uint64((user.SpeedLimit * 1000000) / 8),
 			DeviceLimit:   user.DeviceLimit,
 			Port:          user.Port,
 			Method:        user.Method,
