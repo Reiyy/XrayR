@@ -12,8 +12,10 @@ Nodes:
       NodeID: 41
       NodeType: V2ray # Node type: V2ray, Shadowsocks, Trojan
       Timeout: 30 # Timeout for the api request
-      EnableVless: false # Enable Vless for V2ray Type, Remote configuration first
-      EnableXTLS: false # Enable XTLS for V2ray and Trojan, emote configuration first
+      EnableVless: false # Enable Vless for V2ray Type
+      EnableXTLS: false # Enable XTLS for V2ray and Trojan
+      SpeedLimit: 0 # Local settings will replace remote settings
+      DeviceLimit: 0 # Local settings will replace remote settings
     ControllerConfig:
       ListenIP: 0.0.0.0 # IP address you want to listen
       UpdatePeriodic: 60 # Time to update the nodeinfo, how many sec.
@@ -36,8 +38,10 @@ Nodes:
   #     NodeID: 4
   #     NodeType: Shadowsocks # Node type: V2ray, Shadowsocks, Trojan
   #     Timeout: 30 # Timeout for the api request
-  #     EnableVless: false # Enable Vless for V2ray Type, Remote configuration first
-  #     EnableXTLS: false # Enable XTLS for V2ray and Trojan, emote configuration first
+  #     EnableVless: false # Enable Vless for V2ray Type
+  #     EnableXTLS: false # Enable XTLS for V2ray and Trojan
+  #     SpeedLimit: 0 # Local settings will replace remote settings
+  #     DeviceLimit: 0 # Local settings will replace remote settings
   #   ControllerConfig:
   #     ListenIP: 0.0.0.0 # IP address you want to listen
   #     UpdatePeriodic: 10 # Time to update the nodeinfo, how many sec.

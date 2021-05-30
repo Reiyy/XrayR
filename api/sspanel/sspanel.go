@@ -32,6 +32,8 @@ type APIClient struct {
 	NodeType    string
 	EnableVless bool
 	EnableXTLS  bool
+	SpeedLimit  float64
+	DeviceLimit int
 }
 
 // New creat a api instance
@@ -62,6 +64,8 @@ func New(apiConfig *api.Config) *APIClient {
 		NodeType:    apiConfig.NodeType,
 		EnableVless: apiConfig.EnableVless,
 		EnableXTLS:  apiConfig.EnableXTLS,
+		SpeedLimit:  apiConfig.SpeedLimit,
+		DeviceLimit: apiConfig.DeviceLimit,
 	}
 	return apiClient
 }
@@ -285,6 +289,7 @@ func (c *APIClient) ReportIllegal(detectResultList *[]api.DetectResult) error {
 func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (*api.NodeInfo, error) {
 	var enableTLS bool
 	var path, host, TLStype, transportProtocol string
+	var speedlimit uint64 = 0
 	if nodeInfoResponse.RawServerString == "" {
 		return nil, fmt.Errorf("No server info in response")
 	}
@@ -331,7 +336,12 @@ func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (
 			host = value
 		}
 	}
-	speedlimit := uint64((nodeInfoResponse.SpeedLimit * 1000000) / 8)
+	if c.SpeedLimit > 0 {
+		speedlimit = uint64((c.SpeedLimit * 1000000) / 8)
+	} else {
+		speedlimit = uint64((nodeInfoResponse.SpeedLimit * 1000000) / 8)
+	}
+
 	// Create GeneralNodeInfo
 	nodeinfo := &api.NodeInfo{
 		NodeType:          c.NodeType,
@@ -353,6 +363,7 @@ func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (
 // ParseSSNodeResponse parse the response for the given nodeinfor format
 func (c *APIClient) ParseSSNodeResponse(nodeInfoResponse *NodeInfoResponse) (*api.NodeInfo, error) {
 	var port int = 0
+	var speedlimit uint64 = 0
 	var method string
 	path := "/mod_mu/users"
 	res, err := c.client.R().
@@ -381,7 +392,11 @@ func (c *APIClient) ParseSSNodeResponse(nodeInfoResponse *NodeInfoResponse) (*ap
 		return nil, fmt.Errorf("Cant find the single port multi user")
 	}
 
-	speedlimit := uint64((nodeInfoResponse.SpeedLimit * 1000000) / 8)
+	if c.SpeedLimit > 0 {
+		speedlimit = uint64((c.SpeedLimit * 1000000) / 8)
+	} else {
+		speedlimit = uint64((nodeInfoResponse.SpeedLimit * 1000000) / 8)
+	}
 	// Create GeneralNodeInfo
 	nodeinfo := &api.NodeInfo{
 		NodeType:          c.NodeType,
@@ -400,7 +415,7 @@ func (c *APIClient) ParseTrojanNodeResponse(nodeInfoResponse *NodeInfoResponse) 
 	// 域名或IP;port=连接端口#偏移端口|host=xx
 	// gz.aaa.com;port=443#12345|host=hk.aaa.com
 	var p, TLSType, host, outsidePort, insidePort string
-
+	var speedlimit uint64 = 0
 	if c.EnableXTLS {
 		TLSType = "xtls"
 	} else {
@@ -430,7 +445,11 @@ func (c *APIClient) ParseTrojanNodeResponse(nodeInfoResponse *NodeInfoResponse) 
 	if err != nil {
 		return nil, err
 	}
-	speedlimit := uint64((nodeInfoResponse.SpeedLimit * 1000000) / 8)
+	if c.SpeedLimit > 0 {
+		speedlimit = uint64((c.SpeedLimit * 1000000) / 8)
+	} else {
+		speedlimit = uint64((nodeInfoResponse.SpeedLimit * 1000000) / 8)
+	}
 	// Create GeneralNodeInfo
 	nodeinfo := &api.NodeInfo{
 		NodeType:          c.NodeType,
@@ -446,17 +465,29 @@ func (c *APIClient) ParseTrojanNodeResponse(nodeInfoResponse *NodeInfoResponse) 
 	return nodeinfo, nil
 }
 
-// ParseUserListResponse parse the response for the given nodeinfor format
+// ParseUserListResponse parse the response for the given nodeinfo format
 func (c *APIClient) ParseUserListResponse(userInfoResponse *[]UserResponse) (*[]api.UserInfo, error) {
+	var deviceLimit int = 0
+	var speedlimit uint64 = 0
 	userList := make([]api.UserInfo, len(*userInfoResponse))
 	for i, user := range *userInfoResponse {
+		if c.DeviceLimit > 0 {
+			deviceLimit = c.DeviceLimit
+		} else {
+			deviceLimit = user.DeviceLimit
+		}
+		if c.SpeedLimit > 0 {
+			speedlimit = uint64((c.SpeedLimit * 1000000) / 8)
+		} else {
+			speedlimit = uint64((user.SpeedLimit * 1000000) / 8)
+		}
 		userList[i] = api.UserInfo{
 			UID:           user.ID,
 			Email:         user.Email,
 			UUID:          user.UUID,
 			Passwd:        user.Passwd,
-			SpeedLimit:    uint64((user.SpeedLimit * 1000000) / 8),
-			DeviceLimit:   user.DeviceLimit,
+			SpeedLimit:    speedlimit,
+			DeviceLimit:   deviceLimit,
 			Port:          user.Port,
 			Method:        user.Method,
 			Protocol:      user.Protocol,
