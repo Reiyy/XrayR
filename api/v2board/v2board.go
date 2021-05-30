@@ -20,6 +20,8 @@ type APIClient struct {
 	NodeType    string
 	EnableVless bool
 	EnableXTLS  bool
+	SpeedLimit  float64
+	DeviceLimit int
 }
 
 // New creat a api instance
@@ -55,6 +57,8 @@ func New(apiConfig *api.Config) *APIClient {
 		NodeType:    apiConfig.NodeType,
 		EnableVless: apiConfig.EnableVless,
 		EnableXTLS:  apiConfig.EnableXTLS,
+		SpeedLimit:  apiConfig.SpeedLimit,
+		DeviceLimit: apiConfig.DeviceLimit,
 	}
 	return apiClient
 }
@@ -161,6 +165,8 @@ func (c *APIClient) GetUserList() (UserList *[]api.UserInfo, err error) {
 	for i := 0; i < numOfUsers; i++ {
 		user := api.UserInfo{}
 		user.UID = response.Get("data").GetIndex(i).Get("id").MustInt()
+		user.SpeedLimit = uint64(c.SpeedLimit * 1000000 / 8)
+		user.DeviceLimit = c.DeviceLimit
 		switch c.NodeType {
 		case "Shadowsocks":
 			user.Email = response.Get("data").GetIndex(i).Get("secret").MustString()
