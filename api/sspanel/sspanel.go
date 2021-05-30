@@ -283,8 +283,7 @@ func (c *APIClient) ReportIllegal(detectResultList *[]api.DetectResult) error {
 
 // ParseV2rayNodeResponse parse the response for the given nodeinfor format
 func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (*api.NodeInfo, error) {
-	var enableTLS, enableVless bool
-	enableVless = c.EnableVless
+	var enableTLS bool
 	var path, host, TLStype, transportProtocol string
 	if nodeInfoResponse.RawServerString == "" {
 		return nil, fmt.Errorf("No server info in response")
@@ -302,8 +301,12 @@ func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (
 	// Compatible with more node types config
 	for _, value := range serverConf[3:5] {
 		switch value {
-		case "tls", "xtls":
-			TLStype = value
+		case "tls":
+			if c.EnableXTLS {
+				TLStype = "xtls"
+			} else {
+				TLStype = "tls"
+			}
 			enableTLS = true
 		default:
 			if value != "" {
@@ -326,12 +329,6 @@ func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (
 			path = rawPath
 		case "host":
 			host = value
-		case "enable_vless":
-			{
-				if value == "true" {
-					enableVless = true
-				}
-			}
 		}
 	}
 	speedlimit := (nodeInfoResponse.SpeedLimit * 1000000) / 8
@@ -347,7 +344,7 @@ func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (
 		TLSType:           TLStype,
 		Path:              path,
 		Host:              host,
-		EnableVless:       enableVless,
+		EnableVless:       c.EnableVless,
 	}
 
 	return nodeinfo, nil
@@ -402,8 +399,14 @@ func (c *APIClient) ParseSSNodeResponse(nodeInfoResponse *NodeInfoResponse) (*ap
 func (c *APIClient) ParseTrojanNodeResponse(nodeInfoResponse *NodeInfoResponse) (*api.NodeInfo, error) {
 	// 域名或IP;port=连接端口#偏移端口|host=xx
 	// gz.aaa.com;port=443#12345|host=hk.aaa.com
-	var p, TLSType, host, enableXtls, outsidePort, insidePort string
-	TLSType = "tls"
+	var p, TLSType, host, outsidePort, insidePort string
+
+	if c.EnableXTLS {
+		TLSType = "xtls"
+	} else {
+		TLSType = "tls"
+	}
+
 	if nodeInfoResponse.RawServerString == "" {
 		return nil, fmt.Errorf("No server info in response")
 	}
@@ -416,9 +419,6 @@ func (c *APIClient) ParseTrojanNodeResponse(nodeInfoResponse *NodeInfoResponse) 
 	if result := hostRe.FindStringSubmatch(nodeInfoResponse.RawServerString); len(result) > 1 {
 		host = result[1]
 	}
-	if result := enableXtlsRe.FindStringSubmatch(nodeInfoResponse.RawServerString); len(result) > 1 {
-		enableXtls = result[1]
-	}
 
 	if insidePort != "" {
 		p = insidePort
@@ -429,9 +429,6 @@ func (c *APIClient) ParseTrojanNodeResponse(nodeInfoResponse *NodeInfoResponse) 
 	port, err := strconv.Atoi(p)
 	if err != nil {
 		return nil, err
-	}
-	if enableXtls == "true" {
-		TLSType = "xtls"
 	}
 	speedlimit := (nodeInfoResponse.SpeedLimit * 1000000) / 8
 	// Create GeneralNodeInfo
