@@ -1,8 +1,10 @@
 package v2board
 
 import (
+	"bufio"
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"time"
 
@@ -13,15 +15,16 @@ import (
 
 // APIClient create a api client to the panel.
 type APIClient struct {
-	client      *resty.Client
-	APIHost     string
-	NodeID      int
-	Key         string
-	NodeType    string
-	EnableVless bool
-	EnableXTLS  bool
-	SpeedLimit  float64
-	DeviceLimit int
+	client        *resty.Client
+	APIHost       string
+	NodeID        int
+	Key           string
+	NodeType      string
+	EnableVless   bool
+	EnableXTLS    bool
+	SpeedLimit    float64
+	DeviceLimit   int
+	LocalRuleList []api.DetectRule
 }
 
 // New creat a api instance
@@ -49,18 +52,56 @@ func New(apiConfig *api.Config) *APIClient {
 		"token":      apiConfig.Key,
 		"local_port": "1",
 	})
+	// Read local rule list
+	localRuleList := readLocalRuleList(apiConfig.RuleListPath)
 	apiClient := &APIClient{
-		client:      client,
-		NodeID:      apiConfig.NodeID,
-		Key:         apiConfig.Key,
-		APIHost:     apiConfig.APIHost,
-		NodeType:    apiConfig.NodeType,
-		EnableVless: apiConfig.EnableVless,
-		EnableXTLS:  apiConfig.EnableXTLS,
-		SpeedLimit:  apiConfig.SpeedLimit,
-		DeviceLimit: apiConfig.DeviceLimit,
+		client:        client,
+		NodeID:        apiConfig.NodeID,
+		Key:           apiConfig.Key,
+		APIHost:       apiConfig.APIHost,
+		NodeType:      apiConfig.NodeType,
+		EnableVless:   apiConfig.EnableVless,
+		EnableXTLS:    apiConfig.EnableXTLS,
+		SpeedLimit:    apiConfig.SpeedLimit,
+		DeviceLimit:   apiConfig.DeviceLimit,
+		LocalRuleList: localRuleList,
 	}
 	return apiClient
+}
+
+// readLocalRuleList reads the local rule list file
+func readLocalRuleList(path string) (LocalRuleList []api.DetectRule) {
+
+	LocalRuleList = make([]api.DetectRule, 0)
+	if path != "" {
+		// open the file
+		file, err := os.Open(path)
+
+		//handle errors while opening
+		if err != nil {
+			log.Printf("Error when opening file: %s", err)
+			return LocalRuleList
+		}
+
+		fileScanner := bufio.NewScanner(file)
+
+		// read line by line
+		for fileScanner.Scan() {
+			LocalRuleList = append(LocalRuleList, api.DetectRule{
+				ID:      -1,
+				Pattern: fileScanner.Text(),
+			})
+		}
+		// handle first encountered error while reading
+		if err := fileScanner.Err(); err != nil {
+			log.Fatalf("Error while reading file: %s", err)
+			return make([]api.DetectRule, 0)
+		}
+
+		file.Close()
+	}
+
+	return LocalRuleList
 }
 
 // Describe return a description of the client
@@ -220,7 +261,7 @@ func (c *APIClient) ReportUserTraffic(userTraffic *[]api.UserTraffic) error {
 
 // GetNodeRule implements the API interface
 func (c *APIClient) GetNodeRule() (*[]api.DetectRule, error) {
-	ruleList := make([]api.DetectRule, 0)
+	ruleList := c.LocalRuleList
 	if c.NodeType != "V2ray" {
 		return &ruleList, nil
 	}
