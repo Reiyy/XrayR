@@ -22,9 +22,6 @@ type Controller struct {
 	nodeInfo                *api.NodeInfo
 	Tag                     string
 	userList                *[]api.UserInfo
-	nodeStatus              *api.NodeStatus
-	onlineUsers             *[]api.OnlineUser
-	userTraffic             *[]api.UserTraffic
 	nodeInfoMonitorPeriodic *task.Periodic
 	userReportPeriodic      *task.Periodic
 }
