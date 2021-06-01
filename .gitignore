@@ -10,3 +10,4 @@ common/legocmd/.lego/
 main/.lego
 main/config.yml
 ./vscode
+.idea/*
