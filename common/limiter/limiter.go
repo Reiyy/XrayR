@@ -51,11 +51,7 @@ func (l *Limiter) UpdateInboundLimiter(tag string, updatedUserList *[]api.UserIn
 		// Update User info
 		for _, u := range *updatedUserList {
 			inboundInfo.UserInfo.Store(fmt.Sprintf("%s|%s|%d", tag, u.Email, u.UID), u)
-			limit := determineRate(inboundInfo.NodeSpeedLimit, u.SpeedLimit) // If need the limit
-			if limit > 0 {
-				limiter := ratelimit.NewBucketWithQuantum(time.Duration(int64(time.Second)), int64(limit), int64(limit)) // Byte/s
-				inboundInfo.BucketHub.Store(fmt.Sprintf("%s|%s|%d", tag, u.Email, u.UID), limiter)
-			}
+			inboundInfo.BucketHub.Delete(fmt.Sprintf("%s|%s|%d", tag, u.Email, u.UID)) // Delete old limiter bucket
 		}
 	} else {
 		return fmt.Errorf("no such inbound in limiter: %s", tag)
