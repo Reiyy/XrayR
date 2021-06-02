@@ -68,7 +68,14 @@ func (l *Limiter) GetOnlineDevice(tag string) (*[]api.OnlineUser, error) {
 	onlineUser := make([]api.OnlineUser, 0)
 	if value, ok := l.InboundInfo.Load(tag); ok {
 		inboundInfo := value.(*InboundInfo)
-
+		// Clear Speed Limiter bucket for users who are not online
+		inboundInfo.BucketHub.Range(func(key, value interface{}) bool {
+			email := key.(string)
+			if _, exists := inboundInfo.UserOnlineIP.Load(email); !exists {
+				inboundInfo.BucketHub.Delete(email)
+			}
+			return true
+		})
 		inboundInfo.UserOnlineIP.Range(func(key, value interface{}) bool {
 			ipMap := value.(*sync.Map)
 			ipMap.Range(func(key, value interface{}) bool {
