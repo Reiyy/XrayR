@@ -59,6 +59,8 @@ func New(apiConfig *api.Config) *APIClient {
 	client.SetHostURL(apiConfig.APIHost)
 	// Create Key for each requests
 	client.SetQueryParam("key", apiConfig.Key)
+	// Add support for muKey
+	client.SetQueryParam("muKey", apiConfig.Key)
 	// Read local rule list
 	localRuleList := readLocalRuleList(apiConfig.RuleListPath)
 	apiClient := &APIClient{
