@@ -10,10 +10,16 @@ import (
 	"github.com/juju/ratelimit"
 )
 
+type UserInfo struct {
+	UID         int
+	SpeedLimit  uint64
+	DeviceLimit int
+}
+
 type InboundInfo struct {
 	Tag            string
 	NodeSpeedLimit uint64
-	UserInfo       *sync.Map // Key: Email value: api.UserInfo
+	UserInfo       *sync.Map // Key: Email value: UserInfo
 	BucketHub      *sync.Map // key: Email, value: *ratelimit.Bucket
 	UserOnlineIP   *sync.Map // Key: Email Value: *sync.Map: Key: IP, Value: UID
 }
@@ -36,8 +42,12 @@ func (l *Limiter) AddInboundLimiter(tag string, nodeSpeedLimit uint64, userList 
 		UserOnlineIP:   new(sync.Map),
 	}
 	userMap := new(sync.Map)
-	for _, user := range *userList {
-		userMap.Store(fmt.Sprintf("%s|%s|%d", tag, user.Email, user.UID), user)
+	for _, u := range *userList {
+		userMap.Store(fmt.Sprintf("%s|%s|%d", tag, u.Email, u.UID), UserInfo{
+			UID:         u.UID,
+			SpeedLimit:  u.SpeedLimit,
+			DeviceLimit: u.DeviceLimit,
+		})
 	}
 	inboundInfo.UserInfo = userMap
 	l.InboundInfo.Store(tag, inboundInfo) // Replace the old inbound info
@@ -50,7 +60,11 @@ func (l *Limiter) UpdateInboundLimiter(tag string, updatedUserList *[]api.UserIn
 		inboundInfo := value.(*InboundInfo)
 		// Update User info
 		for _, u := range *updatedUserList {
-			inboundInfo.UserInfo.Store(fmt.Sprintf("%s|%s|%d", tag, u.Email, u.UID), u)
+			inboundInfo.UserInfo.Store(fmt.Sprintf("%s|%s|%d", tag, u.Email, u.UID), UserInfo{
+				UID:         u.UID,
+				SpeedLimit:  u.SpeedLimit,
+				DeviceLimit: u.DeviceLimit,
+			})
 			inboundInfo.BucketHub.Delete(fmt.Sprintf("%s|%s|%d", tag, u.Email, u.UID)) // Delete old limiter bucket
 		}
 	} else {
@@ -102,7 +116,7 @@ func (l *Limiter) GetUserBucket(tag string, email string, ip string) (limiter *r
 		var deviceLimit int = 0
 		var uid int = 0
 		if v, ok := inboundInfo.UserInfo.Load(email); ok {
-			u := v.(api.UserInfo)
+			u := v.(UserInfo)
 			uid = u.UID
 			userLimit = u.SpeedLimit
 			deviceLimit = u.DeviceLimit
