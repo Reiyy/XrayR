@@ -223,7 +223,7 @@ func (c *Controller) removeOldTag(oldtag string) (err error) {
 }
 
 func (c *Controller) addNewTag(newNodeInfo *api.NodeInfo) (err error) {
-	inboundConfig, err := InboundBuilder(c.config.ListenIP, newNodeInfo, c.config.CertConfig)
+	inboundConfig, err := InboundBuilder(c.config, newNodeInfo)
 	if err != nil {
 		return err
 	}
@@ -232,7 +232,7 @@ func (c *Controller) addNewTag(newNodeInfo *api.NodeInfo) (err error) {
 
 		return err
 	}
-	outBoundConfig, err := OutboundBuilder(newNodeInfo, c.config.EnableDNS)
+	outBoundConfig, err := OutboundBuilder(c.config, newNodeInfo)
 	if err != nil {
 
 		return err

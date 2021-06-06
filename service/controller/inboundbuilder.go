@@ -14,11 +14,11 @@ import (
 )
 
 //InboundBuilder build Inbound config for different protocol
-func InboundBuilder(listenIP string, nodeInfo *api.NodeInfo, certConfig *CertConfig) (*core.InboundHandlerConfig, error) {
+func InboundBuilder(config *Config, nodeInfo *api.NodeInfo) (*core.InboundHandlerConfig, error) {
 	inboundDetourConfig := &conf.InboundDetourConfig{}
 	// Build Listen IP address
-	if listenIP != "" {
-		ipAddress := net.ParseAddress(listenIP)
+	if config.ListenIP != "" {
+		ipAddress := net.ParseAddress(config.ListenIP)
 		inboundDetourConfig.ListenOn = &conf.Address{ipAddress}
 	}
 
@@ -101,9 +101,9 @@ func InboundBuilder(listenIP string, nodeInfo *api.NodeInfo, certConfig *CertCon
 
 	streamSetting.Network = &transportProtocol
 	// Build TLS and XTLS settings
-	if nodeInfo.EnableTLS && certConfig.CertMode != "none" {
+	if nodeInfo.EnableTLS && config.CertConfig.CertMode != "none" {
 		streamSetting.Security = nodeInfo.TLSType
-		certFile, keyFile, err := getCertFile(certConfig)
+		certFile, keyFile, err := getCertFile(config.CertConfig)
 		if err != nil {
 			return nil, err
 		}
