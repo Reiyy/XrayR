@@ -2,9 +2,11 @@ package controller
 
 type Config struct {
 	ListenIP       string      `mapstructure:"ListenIP"`
+	SendIP         string      `mapstructure:"SendIP"`
 	UpdatePeriodic int         `mapstructure:"UpdatePeriodic"`
 	CertConfig     *CertConfig `mapstructure:"CertConfig"`
 	EnableDNS      bool        `mapstructure:"EnableDNS"`
+	DNSType        string      `mapstructure:"DNSType"`
 }
 
 type CertConfig struct {
