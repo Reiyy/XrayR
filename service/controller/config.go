@@ -1,12 +1,13 @@
 package controller
 
 type Config struct {
-	ListenIP       string      `mapstructure:"ListenIP"`
-	SendIP         string      `mapstructure:"SendIP"`
-	UpdatePeriodic int         `mapstructure:"UpdatePeriodic"`
-	CertConfig     *CertConfig `mapstructure:"CertConfig"`
-	EnableDNS      bool        `mapstructure:"EnableDNS"`
-	DNSType        string      `mapstructure:"DNSType"`
+	ListenIP            string      `mapstructure:"ListenIP"`
+	SendIP              string      `mapstructure:"SendIP"`
+	UpdatePeriodic      int         `mapstructure:"UpdatePeriodic"`
+	CertConfig          *CertConfig `mapstructure:"CertConfig"`
+	EnableDNS           bool        `mapstructure:"EnableDNS"`
+	DNSType             string      `mapstructure:"DNSType"`
+	EnableProxyProtocol bool        `mapstructure:"EnableProxyProtocol"`
 }
 
 type CertConfig struct {
