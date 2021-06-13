@@ -5,7 +5,7 @@ Log:
 DnsConfigPath: # ./dns.json Path to dns config 
 Nodes:
   -
-    PanelType: "SSpanel" # Panel type: SSpanel, V2board
+    PanelType: "SSpanel" # Panel type: SSpanel, V2board, PMpanel
     ApiConfig:
       ApiHost: "http://127.0.0.1:667"
       ApiKey: "123"
