@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/XrayR-project/XrayR/api"
+	"github.com/XrayR-project/XrayR/api/pmpanel"
 	"github.com/XrayR-project/XrayR/api/sspanel"
 	"github.com/XrayR-project/XrayR/api/v2board"
 	"github.com/XrayR-project/XrayR/app/mydispatcher"
@@ -101,6 +102,8 @@ func (p *Panel) Start() {
 			apiClient = sspanel.New(nodeConfig.ApiConfig)
 		case "V2board":
 			apiClient = v2board.New(nodeConfig.ApiConfig)
+		case "PMpanel": 
+			apiClient = pmpanel.New(nodeConfig.ApiConfig)
 		default:
 			log.Panicf("Unsupport panel type: %s", nodeConfig.PanelType)
 		}

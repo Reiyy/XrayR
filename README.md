@@ -42,10 +42,11 @@ A Xray backend framework that can easily support many panels.
 | 自定义DNS       | √     | √      | √           |
 ## 支持前端
 
-| 前端        | v2ray | trojan | shadowsocks                    |
-| ----------- | ----- | ------ | ------------------------------ |
-| sspanel-uim | √     | √      | √ (Shadowsocks - 单端口多用户) |
-| v2board     | √     | √      | √                              |
+| 前端                                                 | v2ray | trojan | shadowsocks                    |
+| ---------------------------------------------------- | ----- | ------ | ------------------------------ |
+| sspanel-uim                                          | √     | √      | √ (Shadowsocks - 单端口多用户) |
+| v2board                                              | √     | √      | √                              |
+| [PMPanel](https://github.com/ByteInternetHK/PMPanel) | √     | X      | √                              |
 
 ## 软件安装
 ### 一键安装
