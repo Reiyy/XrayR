@@ -57,11 +57,10 @@ func (p *Panel) loadCore(panelConfig *Config) *core.Instance {
 	if err != nil {
 		log.Panicf("Failed to understand dns.json, Please check: https://xtls.github.io/config/base/dns/ for help: %s", err)
 	}
+	// Policy config
+	policy := parseConnectionConfig(panelConfig.ConnetionConfig)
 	policyConfig := &conf.PolicyConfig{}
-	policyConfig.Levels = map[uint32]*conf.Policy{0: &conf.Policy{
-		StatsUserUplink:   true,
-		StatsUserDownlink: true,
-	}}
+	policyConfig.Levels = map[uint32]*conf.Policy{0: policy}
 	pConfig, _ := policyConfig.Build()
 	config := &core.Config{
 		App: []*serial.TypedMessage{
@@ -102,7 +101,7 @@ func (p *Panel) Start() {
 			apiClient = sspanel.New(nodeConfig.ApiConfig)
 		case "V2board":
 			apiClient = v2board.New(nodeConfig.ApiConfig)
-		case "PMpanel": 
+		case "PMpanel":
 			apiClient = pmpanel.New(nodeConfig.ApiConfig)
 		default:
 			log.Panicf("Unsupport panel type: %s", nodeConfig.PanelType)
@@ -137,5 +136,33 @@ func (p *Panel) Close() {
 	}
 	p.Server.Close()
 	p.Running = false
+	return
+}
+
+func parseConnectionConfig(c *ConnetionConfig) (policy *conf.Policy) {
+	policy = &conf.Policy{
+		StatsUserUplink:   true,
+		StatsUserDownlink: true,
+	}
+	if c != nil {
+		if c.ConnIdle > 0 {
+			policy.ConnectionIdle = &c.ConnIdle
+		} else {
+			c.ConnIdle = 30
+		}
+		if c.Handshake > 0 {
+			policy.Handshake = &c.Handshake
+		}
+		if c.UplinkOnly > 0 {
+			policy.UplinkOnly = &c.UplinkOnly
+		}
+		if c.DownlinkOnly > 0 {
+			policy.DownlinkOnly = &c.DownlinkOnly
+		}
+		if c.BufferSize > 0 {
+			policy.BufferSize = &c.BufferSize
+		}
+	}
+
 	return
 }
