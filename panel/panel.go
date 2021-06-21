@@ -14,6 +14,7 @@ import (
 	_ "github.com/XrayR-project/XrayR/main/distro/all"
 	"github.com/XrayR-project/XrayR/service"
 	"github.com/XrayR-project/XrayR/service/controller"
+	"github.com/r3labs/diff/v2"
 	"github.com/xtls/xray-core/app/proxyman"
 	"github.com/xtls/xray-core/app/stats"
 	"github.com/xtls/xray-core/common/serial"
@@ -37,34 +38,40 @@ func New(panelConfig *Config) *Panel {
 
 func (p *Panel) loadCore(panelConfig *Config) *core.Instance {
 	// Log Config
-	logConfig := &conf.LogConfig{
-		LogLevel:  panelConfig.LogConfig.Level,
-		AccessLog: panelConfig.LogConfig.AccessPath,
-		ErrorLog:  panelConfig.LogConfig.ErrorPath,
+	coreLogConfig := &conf.LogConfig{}
+	defaultLogConfig := getDefaultLogConfig()
+	if panelConfig.LogConfig != nil {
+		if _, err := diff.Merge(defaultLogConfig, panelConfig.LogConfig, defaultLogConfig); err != nil {
+			log.Panicf("Read Log config failed: %s", err)
+		}
 	}
+	coreLogConfig.LogLevel = defaultLogConfig.Level
+	coreLogConfig.AccessLog = defaultLogConfig.AccessPath
+	coreLogConfig.ErrorLog = defaultLogConfig.ErrorPath
+
 	// DNS config
-	dnsConfig := &conf.DNSConfig{}
+	coreDnsConfig := &conf.DNSConfig{}
 	if panelConfig.DnsConfigPath != "" {
 		if data, err := io.ReadFile(panelConfig.DnsConfigPath); err != nil {
 			log.Panicf("Failed to read dns.json at: %s", panelConfig.DnsConfigPath)
 		} else {
-			if err = json.Unmarshal(data, dnsConfig); err != nil {
+			if err = json.Unmarshal(data, coreDnsConfig); err != nil {
 				log.Panicf("Failed to unmarshal dns.json")
 			}
 		}
 	}
-	dConfig, err := dnsConfig.Build()
+	dConfig, err := coreDnsConfig.Build()
 	if err != nil {
 		log.Panicf("Failed to understand dns.json, Please check: https://xtls.github.io/config/base/dns/ for help: %s", err)
 	}
 	// Policy config
-	policy := parseConnectionConfig(panelConfig.ConnetionConfig)
-	policyConfig := &conf.PolicyConfig{}
-	policyConfig.Levels = map[uint32]*conf.Policy{0: policy}
-	pConfig, _ := policyConfig.Build()
+	levelPolicyConfig := parseConnectionConfig(panelConfig.ConnetionConfig)
+	corePolicyConfig := &conf.PolicyConfig{}
+	corePolicyConfig.Levels = map[uint32]*conf.Policy{0: levelPolicyConfig}
+	pConfig, _ := corePolicyConfig.Build()
 	config := &core.Config{
 		App: []*serial.TypedMessage{
-			serial.ToTypedMessage(logConfig.Build()),
+			serial.ToTypedMessage(coreLogConfig.Build()),
 			serial.ToTypedMessage(&mydispatcher.Config{}),
 			serial.ToTypedMessage(&stats.Config{}),
 			serial.ToTypedMessage(&proxyman.InboundConfig{}),
@@ -108,7 +115,13 @@ func (p *Panel) Start() {
 		}
 		var controllerService service.Service
 		// Regist controller service
-		controllerService = controller.New(server, apiClient, nodeConfig.ControllerConfig)
+		defaultControllerConfig := getDefaultControllerConfig()
+		if nodeConfig.ControllerConfig != nil {
+			if _, err := diff.Merge(defaultControllerConfig, nodeConfig.ControllerConfig, defaultControllerConfig); err != nil {
+				log.Panicf("Read Controller Config Failed")
+			}
+		}
+		controllerService = controller.New(server, apiClient, defaultControllerConfig)
 		p.Service = append(p.Service, controllerService)
 
 	}
@@ -140,28 +153,20 @@ func (p *Panel) Close() {
 }
 
 func parseConnectionConfig(c *ConnetionConfig) (policy *conf.Policy) {
+	defaultConnetionConfig := getDefaultConnetionConfig()
+	if c != nil {
+		if _, err := diff.Merge(defaultConnetionConfig, c, defaultConnetionConfig); err != nil {
+			log.Panicf("Read ConnetionConfig failed: %s", err)
+		}
+	}
 	policy = &conf.Policy{
 		StatsUserUplink:   true,
 		StatsUserDownlink: true,
-	}
-	if c != nil {
-		if c.ConnIdle > 0 {
-			policy.ConnectionIdle = &c.ConnIdle
-		} else {
-			c.ConnIdle = 30
-		}
-		if c.Handshake > 0 {
-			policy.Handshake = &c.Handshake
-		}
-		if c.UplinkOnly > 0 {
-			policy.UplinkOnly = &c.UplinkOnly
-		}
-		if c.DownlinkOnly > 0 {
-			policy.DownlinkOnly = &c.DownlinkOnly
-		}
-		if c.BufferSize > 0 {
-			policy.BufferSize = &c.BufferSize
-		}
+		Handshake:         &defaultConnetionConfig.Handshake,
+		ConnectionIdle:    &defaultConnetionConfig.ConnIdle,
+		UplinkOnly:        &defaultConnetionConfig.UplinkOnly,
+		DownlinkOnly:      &defaultConnetionConfig.DownlinkOnly,
+		BufferSize:        &defaultConnetionConfig.BufferSize,
 	}
 
 	return
