@@ -189,6 +189,10 @@ func getCertFile(certConfig *CertConfig) (certFile string, keyFile string, err e
 }
 
 func buildVlessFallbacks(fallbackConfigs []*FallBackConfig) ([]*conf.VLessInboundFallback, error) {
+	if fallbackConfigs == nil {
+		return nil, fmt.Errorf("You must provide FallBackConfigs")
+	}
+
 	vlessFallBacks := make([]*conf.VLessInboundFallback, len(fallbackConfigs))
 	for i, c := range fallbackConfigs {
 
@@ -212,6 +216,10 @@ func buildVlessFallbacks(fallbackConfigs []*FallBackConfig) ([]*conf.VLessInboun
 }
 
 func buildTrojanFallbacks(fallbackConfigs []*FallBackConfig) ([]*conf.TrojanInboundFallback, error) {
+	if fallbackConfigs == nil {
+		return nil, fmt.Errorf("You must provide FallBackConfigs")
+	}
+	
 	trojanFallBacks := make([]*conf.TrojanInboundFallback, len(fallbackConfigs))
 	for i, c := range fallbackConfigs {
 
