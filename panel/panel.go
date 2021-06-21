@@ -14,6 +14,7 @@ import (
 	_ "github.com/XrayR-project/XrayR/main/distro/all"
 	"github.com/XrayR-project/XrayR/service"
 	"github.com/XrayR-project/XrayR/service/controller"
+	"github.com/imdario/mergo"
 	"github.com/r3labs/diff/v2"
 	"github.com/xtls/xray-core/app/proxyman"
 	"github.com/xtls/xray-core/app/stats"
@@ -39,15 +40,15 @@ func New(panelConfig *Config) *Panel {
 func (p *Panel) loadCore(panelConfig *Config) *core.Instance {
 	// Log Config
 	coreLogConfig := &conf.LogConfig{}
-	defaultLogConfig := getDefaultLogConfig()
+	logConfig := getDefaultLogConfig()
 	if panelConfig.LogConfig != nil {
-		if _, err := diff.Merge(defaultLogConfig, panelConfig.LogConfig, defaultLogConfig); err != nil {
+		if _, err := diff.Merge(logConfig, panelConfig.LogConfig, logConfig); err != nil {
 			log.Panicf("Read Log config failed: %s", err)
 		}
 	}
-	coreLogConfig.LogLevel = defaultLogConfig.Level
-	coreLogConfig.AccessLog = defaultLogConfig.AccessPath
-	coreLogConfig.ErrorLog = defaultLogConfig.ErrorPath
+	coreLogConfig.LogLevel = logConfig.Level
+	coreLogConfig.AccessLog = logConfig.AccessPath
+	coreLogConfig.ErrorLog = logConfig.ErrorPath
 
 	// DNS config
 	coreDnsConfig := &conf.DNSConfig{}
@@ -115,13 +116,13 @@ func (p *Panel) Start() {
 		}
 		var controllerService service.Service
 		// Regist controller service
-		defaultControllerConfig := getDefaultControllerConfig()
+		controllerConfig := getDefaultControllerConfig()
 		if nodeConfig.ControllerConfig != nil {
-			if _, err := diff.Merge(defaultControllerConfig, nodeConfig.ControllerConfig, defaultControllerConfig); err != nil {
+			if err := mergo.Merge(controllerConfig, nodeConfig.ControllerConfig, mergo.WithOverride); err != nil {
 				log.Panicf("Read Controller Config Failed")
 			}
 		}
-		controllerService = controller.New(server, apiClient, defaultControllerConfig)
+		controllerService = controller.New(server, apiClient, controllerConfig)
 		p.Service = append(p.Service, controllerService)
 
 	}
@@ -153,20 +154,20 @@ func (p *Panel) Close() {
 }
 
 func parseConnectionConfig(c *ConnetionConfig) (policy *conf.Policy) {
-	defaultConnetionConfig := getDefaultConnetionConfig()
+	connetionConfig := getDefaultConnetionConfig()
 	if c != nil {
-		if _, err := diff.Merge(defaultConnetionConfig, c, defaultConnetionConfig); err != nil {
+		if _, err := diff.Merge(connetionConfig, c, connetionConfig); err != nil {
 			log.Panicf("Read ConnetionConfig failed: %s", err)
 		}
 	}
 	policy = &conf.Policy{
 		StatsUserUplink:   true,
 		StatsUserDownlink: true,
-		Handshake:         &defaultConnetionConfig.Handshake,
-		ConnectionIdle:    &defaultConnetionConfig.ConnIdle,
-		UplinkOnly:        &defaultConnetionConfig.UplinkOnly,
-		DownlinkOnly:      &defaultConnetionConfig.DownlinkOnly,
-		BufferSize:        &defaultConnetionConfig.BufferSize,
+		Handshake:         &connetionConfig.Handshake,
+		ConnectionIdle:    &connetionConfig.ConnIdle,
+		UplinkOnly:        &connetionConfig.UplinkOnly,
+		DownlinkOnly:      &connetionConfig.DownlinkOnly,
+		BufferSize:        &connetionConfig.BufferSize,
 	}
 
 	return

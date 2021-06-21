@@ -13,7 +13,7 @@ func getDefaultLogConfig() *LogConfig {
 func getDefaultConnetionConfig() *ConnetionConfig {
 	return &ConnetionConfig{
 		Handshake:    4,
-		ConnIdle:     10,
+		ConnIdle:     30,
 		UplinkOnly:   2,
 		DownlinkOnly: 4,
 		BufferSize:   64,
@@ -26,11 +26,5 @@ func getDefaultControllerConfig() *controller.Config {
 		SendIP:         "0.0.0.0",
 		UpdatePeriodic: 60,
 		DNSType:        "AsIs",
-		CertConfig: &controller.CertConfig{
-			CertMode: "none",
-		},
-		FallBackConfigs: []*controller.FallBackConfig{
-			&controller.FallBackConfig{},
-		},
 	}
 }
