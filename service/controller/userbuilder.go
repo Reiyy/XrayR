@@ -87,6 +87,30 @@ func buildSSUser(tag string, userInfo *[]api.UserInfo, method string) (users []*
 	return users
 }
 
+func buildSSPluginUser(tag string, userInfo *[]api.UserInfo) (users []*protocol.User) {
+	users = make([]*protocol.User, 0)
+
+	for _, user := range *userInfo {
+		// Check if the cypher method is AEAD
+		cypherMethod := cipherFromString(user.Method)
+		for _, aeadMethod := range AEADMethod {
+			if aeadMethod == cypherMethod {
+				ssAccount := &shadowsocks.Account{
+					Password:   user.Passwd,
+					CipherType: cypherMethod,
+				}
+				users = append(users, &protocol.User{
+					Level:   0,
+					Email:   fmt.Sprintf("%s|%s|%d", tag, user.Email, user.UID),
+					Account: serial.ToTypedMessage(ssAccount),
+				})
+			}
+		}
+
+	}
+	return users
+}
+
 func cipherFromString(c string) shadowsocks.CipherType {
 	switch strings.ToLower(c) {
 	case "aes-256-cfb":

@@ -80,7 +80,7 @@ func InboundBuilder(config *Config, nodeInfo *api.NodeInfo) (*core.InboundHandle
 		} else {
 			proxySetting = &conf.TrojanServerConfig{}
 		}
-	} else if nodeInfo.NodeType == "Shadowsocks" {
+	} else if nodeInfo.NodeType == "Shadowsocks" || nodeInfo.NodeType == "Shadowsocks-Plugin" {
 		protocol = "shadowsocks"
 		proxySetting = &conf.ShadowsocksServerConfig{}
 		randomPasswd := uuid.New()
@@ -91,8 +91,17 @@ func InboundBuilder(config *Config, nodeInfo *api.NodeInfo) (*core.InboundHandle
 		proxySetting, _ := proxySetting.(*conf.ShadowsocksServerConfig)
 		proxySetting.Users = append(proxySetting.Users, defaultSSuser)
 		proxySetting.NetworkList = &conf.NetworkList{"tcp", "udp"}
+	} else if nodeInfo.NodeType == "dokodemo-door" {
+		protocol = "dokodemo-door"
+		proxySetting = struct {
+			Host        string   `json:"address"`
+			NetworkList []string `json:"network"`
+		}{
+			Host:        "v1.mux.cool",
+			NetworkList: []string{"tcp", "udp"},
+		}
 	} else {
-		return nil, fmt.Errorf("Unsupported node type: %s, Only support: V2ray, Trojan, and Shadowsocks", nodeInfo.NodeType)
+		return nil, fmt.Errorf("Unsupported node type: %s, Only support: V2ray, Trojan, Shadowsocks, and Shadowsocks-Plugin", nodeInfo.NodeType)
 	}
 
 	setting, err := json.Marshal(proxySetting)
@@ -219,7 +228,7 @@ func buildTrojanFallbacks(fallbackConfigs []*FallBackConfig) ([]*conf.TrojanInbo
 	if fallbackConfigs == nil {
 		return nil, fmt.Errorf("You must provide FallBackConfigs")
 	}
-	
+
 	trojanFallBacks := make([]*conf.TrojanInboundFallback, len(fallbackConfigs))
 	for i, c := range fallbackConfigs {
 
