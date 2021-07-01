@@ -17,7 +17,10 @@ import (
 func InboundBuilder(config *Config, nodeInfo *api.NodeInfo) (*core.InboundHandlerConfig, error) {
 	inboundDetourConfig := &conf.InboundDetourConfig{}
 	// Build Listen IP address
-	if config.ListenIP != "" {
+	if nodeInfo.NodeType == "Shadowsocks-Plugin" {
+		// Shdowsocks listen in 127.0.0.1 for safety
+		inboundDetourConfig.ListenOn = &conf.Address{net.ParseAddress("127.0.0.1")}
+	} else if config.ListenIP != "" {
 		ipAddress := net.ParseAddress(config.ListenIP)
 		inboundDetourConfig.ListenOn = &conf.Address{ipAddress}
 	}
