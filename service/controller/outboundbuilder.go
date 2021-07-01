@@ -34,6 +34,7 @@ func OutboundBuilder(config *Config, nodeInfo *api.NodeInfo) (*core.OutboundHand
 	proxySetting := &conf.FreedomConfig{
 		DomainStrategy: domainStrategy,
 	}
+	// Used for Shadowsocks-Plugin
 	if nodeInfo.NodeType == "dokodemo-door" {
 		proxySetting.Redirect = fmt.Sprintf("127.0.0.1:%d", nodeInfo.Port-1)
 	}
