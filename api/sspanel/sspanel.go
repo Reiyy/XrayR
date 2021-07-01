@@ -170,6 +170,8 @@ func (c *APIClient) GetNodeInfo() (nodeInfo *api.NodeInfo, err error) {
 		nodeInfo, err = c.ParseTrojanNodeResponse(nodeInfoResponse)
 	case "Shadowsocks":
 		nodeInfo, err = c.ParseSSNodeResponse(nodeInfoResponse)
+	case "Shadowsocks-Plugin":
+		nodeInfo, err = c.ParseSSPluginNodeResponse(nodeInfoResponse)
 	default:
 		return nil, fmt.Errorf("Unsupported Node type: %s", c.NodeType)
 	}
@@ -448,6 +450,75 @@ func (c *APIClient) ParseSSNodeResponse(nodeInfoResponse *NodeInfoResponse) (*ap
 		SpeedLimit:        speedlimit,
 		TransportProtocol: "tcp",
 		CypherMethod:      method,
+	}
+
+	return nodeinfo, nil
+}
+
+// ParseSSPluginNodeResponse parse the response for the given nodeinfor format
+func (c *APIClient) ParseSSPluginNodeResponse(nodeInfoResponse *NodeInfoResponse) (*api.NodeInfo, error) {
+	var enableTLS bool
+	var path, host, TLStype, transportProtocol string
+	var speedlimit uint64 = 0
+
+	serverConf := strings.Split(nodeInfoResponse.RawServerString, ";")
+	port, err := strconv.Atoi(serverConf[1])
+	if err != nil {
+		return nil, err
+	}
+	port = port - 1 // Shadowsocks-Plugin requires two ports, one for ss the other for other stream protocol
+	if port <= 0 {
+		return nil, fmt.Errorf("Shadowsocks-Plugin listen port must bigger than 1")
+	}
+	// Compatible with more node types config
+	for _, value := range serverConf[3:5] {
+		switch value {
+		case "tls", "xtls":
+			if c.EnableXTLS {
+				TLStype = "xtls"
+			} else {
+				TLStype = "tls"
+			}
+			enableTLS = true
+		case "ws":
+			transportProtocol = "ws"
+		case "obfs":
+			transportProtocol = "tcp"
+		}
+	}
+	extraServerConf := strings.Split(serverConf[5], "|")
+	for _, item := range extraServerConf {
+		conf := strings.Split(item, "=")
+		key := conf[0]
+		if key == "" {
+			continue
+		}
+		value := conf[1]
+		switch key {
+		case "path":
+			rawPath := strings.Join(conf[1:], "=") // In case of the path strings contains the "="
+			path = rawPath
+		case "host":
+			host = value
+		}
+	}
+	if c.SpeedLimit > 0 {
+		speedlimit = uint64((c.SpeedLimit * 1000000) / 8)
+	} else {
+		speedlimit = uint64((nodeInfoResponse.SpeedLimit * 1000000) / 8)
+	}
+
+	// Create GeneralNodeInfo
+	nodeinfo := &api.NodeInfo{
+		NodeType:          c.NodeType,
+		NodeID:            c.NodeID,
+		Port:              port,
+		SpeedLimit:        speedlimit,
+		TransportProtocol: transportProtocol,
+		EnableTLS:         enableTLS,
+		TLSType:           TLStype,
+		Path:              path,
+		Host:              host,
 	}
 
 	return nodeinfo, nil
