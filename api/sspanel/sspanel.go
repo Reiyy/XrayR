@@ -282,6 +282,7 @@ func (c *APIClient) ReportUserTraffic(userTraffic *[]api.UserTraffic) error {
 
 // GetNodeRule will pull the audit rule form sspanel
 func (c *APIClient) GetNodeRule() (*[]api.DetectRule, error) {
+	ruleList := c.LocalRuleList
 	path := "/mod_mu/func/detect_rules"
 	res, err := c.client.R().
 		SetResult(&Response{}).
@@ -295,12 +296,12 @@ func (c *APIClient) GetNodeRule() (*[]api.DetectRule, error) {
 	if err := json.Unmarshal(response.Data, ruleListResponse); err != nil {
 		return nil, fmt.Errorf("Unmarshal %s failed: %s", reflect.TypeOf(ruleListResponse), err)
 	}
-	ruleList := make([]api.DetectRule, len(*ruleListResponse))
-	for i, r := range *ruleListResponse {
-		ruleList[i] = api.DetectRule{
+
+	for _, r := range *ruleListResponse {
+		ruleList = append(ruleList, api.DetectRule{
 			ID:      r.ID,
 			Pattern: r.Content,
-		}
+		})
 	}
 	return &ruleList, nil
 }

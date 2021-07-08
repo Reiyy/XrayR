@@ -46,7 +46,8 @@ A Xray backend framework that can easily support many panels.
 | ---------------------------------------------------- | ----- | ------ | ------------------------------ |
 | sspanel-uim                                          | √     | √      | √ (Shadowsocks - 单端口多用户) |
 | v2board                                              | √     | √      | √                              |
-| [PMPanel](https://github.com/ByteInternetHK/PMPanel) | √     | X      | √                              |
+| [PMPanel](https://github.com/ByteInternetHK/PMPanel) | √     | ×      | √                              |
+| ProxyPanel                                           | √     | √      | ×                              |
 
 ## 软件安装
 ### 一键安装
