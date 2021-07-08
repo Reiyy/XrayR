@@ -29,6 +29,7 @@ type NodeInfo struct {
 	SpeedLimit        uint64 // Bps
 	AlterID           int
 	TransportProtocol string
+	FakeType          string
 	Host              string
 	Path              string
 	EnableTLS         bool

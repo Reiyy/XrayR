@@ -66,23 +66,18 @@ func buildTrojanUser(tag string, userInfo *[]api.UserInfo) (users []*protocol.Us
 
 func buildSSUser(tag string, userInfo *[]api.UserInfo, method string) (users []*protocol.User) {
 	users = make([]*protocol.User, 0)
-	// Check if the cypher method is AEAD
+
 	cypherMethod := cipherFromString(method)
 	for _, user := range *userInfo {
-		for _, aeadMethod := range AEADMethod {
-			if aeadMethod == cypherMethod {
-				ssAccount := &shadowsocks.Account{
-					Password:   user.Passwd,
-					CipherType: cypherMethod,
-				}
-				users = append(users, &protocol.User{
-					Level:   0,
-					Email:   fmt.Sprintf("%s|%s|%d", tag, user.Email, user.UID),
-					Account: serial.ToTypedMessage(ssAccount),
-				})
-			}
+		ssAccount := &shadowsocks.Account{
+			Password:   user.Passwd,
+			CipherType: cypherMethod,
 		}
-
+		users = append(users, &protocol.User{
+			Level:   0,
+			Email:   fmt.Sprintf("%s|%s|%d", tag, user.Email, user.UID),
+			Account: serial.ToTypedMessage(ssAccount),
+		})
 	}
 	return users
 }
