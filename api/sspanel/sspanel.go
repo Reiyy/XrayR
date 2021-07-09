@@ -194,6 +194,9 @@ func (c *APIClient) GetUserList() (UserList *[]api.UserInfo, err error) {
 		Get(path)
 
 	response, err := c.parseResponse(res, path, err)
+	if err != nil {
+		return nil, err
+	}
 
 	userListResponse := new([]UserResponse)
 
@@ -290,6 +293,9 @@ func (c *APIClient) GetNodeRule() (*[]api.DetectRule, error) {
 		Get(path)
 
 	response, err := c.parseResponse(res, path, err)
+	if err != nil {
+		return nil, err
+	}
 
 	ruleListResponse := new([]RuleItem)
 
@@ -419,6 +425,9 @@ func (c *APIClient) ParseSSNodeResponse(nodeInfoResponse *NodeInfoResponse) (*ap
 		Get(path)
 
 	response, err := c.parseResponse(res, path, err)
+	if err != nil {
+		return nil, err
+	}
 
 	userListResponse := new([]UserResponse)
 
