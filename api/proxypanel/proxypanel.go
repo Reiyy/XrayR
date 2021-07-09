@@ -346,6 +346,9 @@ func (c *APIClient) GetNodeRule() (*[]api.DetectRule, error) {
 		Get(path)
 
 	response, err := c.parseResponse(res, path, err)
+	if err != nil {
+		return nil, err
+	}
 
 	ruleListResponse := new(NodeRule)
 
