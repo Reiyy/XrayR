@@ -576,7 +576,7 @@ func (c *APIClient) ParseTrojanNodeResponse(nodeInfoResponse *NodeInfoResponse) 
 	serverConf := strings.Split(nodeInfoResponse.RawServerString, ";")
 	extraServerConf := strings.Split(serverConf[1], "|")
 	transportProtocol = "tcp"
-    serviceName = ""
+        serviceName = ""
 	for _, item := range extraServerConf {
 		conf := strings.Split(item, "=")
 		key := conf[0]
