@@ -36,6 +36,7 @@ type NodeInfo struct {
 	TLSType           string
 	EnableVless       bool
 	CypherMethod      string
+	ServiceName       string
 }
 
 type UserInfo struct {
