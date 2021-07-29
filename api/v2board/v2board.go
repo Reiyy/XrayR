@@ -352,7 +352,7 @@ func (c *APIClient) ParseSSNodeResponse() (*api.NodeInfo, error) {
 // ParseV2rayNodeResponse parse the response for the given nodeinfor format
 func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *simplejson.Json) (*api.NodeInfo, error) {
 	var TLSType string = "tls"
-	var path, host string
+	var path, host, serviceName string
 	var enableTLS bool
 	var alterID int = 0
 	if c.EnableXTLS {
@@ -366,8 +366,9 @@ func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *simplejson.Json) (*
 	case "ws":
 		path = inboundInfo.Get("streamSettings").Get("wsSettings").Get("path").MustString()
 		host = inboundInfo.Get("streamSettings").Get("wsSettings").Get("headers").Get("Host").MustString()
+	case "grpc":
+		serviceName = inboundInfo.Get("streamSettings").Get("grpcSettings").Get("serviceName").MustString()
 	}
-
 	if inboundInfo.Get("streamSettings").Get("security").MustString() == "tls" {
 		enableTLS = true
 	} else {
@@ -393,6 +394,7 @@ func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *simplejson.Json) (*
 		Path:              path,
 		Host:              host,
 		EnableVless:       c.EnableVless,
+		ServiceName:       serviceName,
 	}
 	return nodeinfo, nil
 }
