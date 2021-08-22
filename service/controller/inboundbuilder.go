@@ -120,8 +120,16 @@ func InboundBuilder(config *Config, nodeInfo *api.NodeInfo) (*core.InboundHandle
 		return nil, fmt.Errorf("convert TransportProtocol failed: %s", err)
 	}
 	if networkType == "tcp" {
+		headers := make(map[string]string)
+		headers["type"] = nodeInfo.HeaderType
+		var header json.RawMessage
+		header, err  := json.Marshal(headers)
+		if err != nil {
+			return nil, fmt.Errorf("Marshal Header Type %s into config fialed: %s", header, err)
+		}	
 		tcpSetting := &conf.TCPConfig{
 			AcceptProxyProtocol: config.EnableProxyProtocol,
+			HeaderConfig : header,			
 		}
 		streamSetting.TCPSettings = tcpSetting
 	} else if networkType == "websocket" {
