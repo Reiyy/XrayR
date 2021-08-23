@@ -423,7 +423,7 @@ func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (
 func (c *APIClient) ParseSSNodeResponse(nodeInfoResponse *NodeInfoResponse) (*api.NodeInfo, error) {
 	var port int = 0
 	var speedlimit uint64 = 0
-	var method, HeaderType string
+	var method string
 	path := "/mod_mu/users"
 	res, err := c.client.R().
 		SetQueryParam("node_id", strconv.Itoa(c.NodeID)).
@@ -449,7 +449,6 @@ func (c *APIClient) ParseSSNodeResponse(nodeInfoResponse *NodeInfoResponse) (*ap
 			break
 		}
 	}
-	HeaderType = "none"
 	if port == 0 || method == "" {
 		return nil, fmt.Errorf("Cant find the single port multi user")
 	}
@@ -467,7 +466,7 @@ func (c *APIClient) ParseSSNodeResponse(nodeInfoResponse *NodeInfoResponse) (*ap
 		SpeedLimit:        speedlimit,
 		TransportProtocol: "tcp",
 		CypherMethod:      method,
-		HeaderType:        HeaderType,
+		HeaderType:        "none",
 	}
 
 	return nodeinfo, nil
@@ -476,7 +475,7 @@ func (c *APIClient) ParseSSNodeResponse(nodeInfoResponse *NodeInfoResponse) (*ap
 // ParseSSPluginNodeResponse parse the response for the given nodeinfor format
 func (c *APIClient) ParseSSPluginNodeResponse(nodeInfoResponse *NodeInfoResponse) (*api.NodeInfo, error) {
 	var enableTLS bool
-	var path, host, TLStype, transportProtocol, HeaderType string
+	var path, host, TLStype, transportProtocol string
 	var speedlimit uint64 = 0
 
 	serverConf := strings.Split(nodeInfoResponse.RawServerString, ";")
@@ -504,7 +503,6 @@ func (c *APIClient) ParseSSPluginNodeResponse(nodeInfoResponse *NodeInfoResponse
 			transportProtocol = "tcp"
 		}
 	}
-	HeaderType = "none"
 	
 	extraServerConf := strings.Split(serverConf[5], "|")
 	for _, item := range extraServerConf {
@@ -539,7 +537,7 @@ func (c *APIClient) ParseSSPluginNodeResponse(nodeInfoResponse *NodeInfoResponse
 		TLSType:           TLStype,
 		Path:              path,
 		Host:              host,
-		HeaderType:        HeaderType,
+		HeaderType:        "none",
 	}
 
 	return nodeinfo, nil
@@ -549,7 +547,7 @@ func (c *APIClient) ParseSSPluginNodeResponse(nodeInfoResponse *NodeInfoResponse
 func (c *APIClient) ParseTrojanNodeResponse(nodeInfoResponse *NodeInfoResponse) (*api.NodeInfo, error) {
 	// 域名或IP;port=连接端口#偏移端口|host=xx
 	// gz.aaa.com;port=443#12345|host=hk.aaa.com
-	var p, TLSType, host, outsidePort, insidePort, transportProtocol, serviceName, HeaderType string
+	var p, TLSType, host, outsidePort, insidePort, transportProtocol, serviceName string
 	var speedlimit uint64 = 0
 	if c.EnableXTLS {
 		TLSType = "xtls"
@@ -584,7 +582,6 @@ func (c *APIClient) ParseTrojanNodeResponse(nodeInfoResponse *NodeInfoResponse) 
 	serverConf := strings.Split(nodeInfoResponse.RawServerString, ";")
 	extraServerConf := strings.Split(serverConf[1], "|")
 	transportProtocol = "tcp"
-	HeaderType = "none"
 	serviceName = ""
 	for _, item := range extraServerConf {
 		conf := strings.Split(item, "=")
@@ -617,7 +614,7 @@ func (c *APIClient) ParseTrojanNodeResponse(nodeInfoResponse *NodeInfoResponse) 
 		TLSType:           TLSType,
 		Host:              host,
 		ServiceName:       serviceName,
-		HeaderType:        HeaderType,
+		HeaderType:        "none",
 	}
 
 	return nodeinfo, nil
