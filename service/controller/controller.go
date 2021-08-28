@@ -68,11 +68,13 @@ func (c *Controller) Start() error {
 		log.Print(err)
 	}
 	// Add Rule Manager
-	if ruleList, err := c.apiClient.GetNodeRule(); err != nil {
-		log.Printf("Get rule list filed: %s", err)
-	} else if len(*ruleList) > 0 {
-		if err := c.UpdateRule(c.Tag, *ruleList); err != nil {
-			log.Print(err)
+	if !c.config.DisableGetRule {
+		if ruleList, err := c.apiClient.GetNodeRule(); err != nil {
+			log.Printf("Get rule list filed: %s", err)
+		} else if len(*ruleList) > 0 {
+			if err := c.UpdateRule(c.Tag, *ruleList); err != nil {
+				log.Print(err)
+			}
 		}
 	}
 	c.nodeInfoMonitorPeriodic = &task.Periodic{
@@ -157,11 +159,13 @@ func (c *Controller) nodeInfoMonitor() (err error) {
 	}
 
 	// Check Rule
-	if ruleList, err := c.apiClient.GetNodeRule(); err != nil {
-		log.Printf("Get rule list filed: %s", err)
-	} else if len(*ruleList) > 0 {
-		if err := c.UpdateRule(c.Tag, *ruleList); err != nil {
-			log.Print(err)
+	if !c.config.DisableGetRule {
+		if ruleList, err := c.apiClient.GetNodeRule(); err != nil {
+			log.Printf("Get rule list filed: %s", err)
+		} else if len(*ruleList) > 0 {
+			if err := c.UpdateRule(c.Tag, *ruleList); err != nil {
+				log.Print(err)
+			}
 		}
 	}
 
@@ -400,7 +404,7 @@ func (c *Controller) userInfoMonitor() (err error) {
 				Download: down})
 		}
 	}
-	if len(userTraffic) > 0 {
+	if len(userTraffic) > 0 && !c.config.DisableUploadTraffic {
 		err = c.apiClient.ReportUserTraffic(&userTraffic)
 		if err != nil {
 			log.Print(err)
