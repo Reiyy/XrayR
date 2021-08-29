@@ -382,7 +382,7 @@ func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (
 		Path:              path,
 		Host:              host,
 		EnableVless:       c.EnableVless,
-		ServiceName:       host,
+		ServiceName:       nodeInfoResponse.Sni,
 	}
 
 	return nodeinfo, nil
@@ -446,7 +446,7 @@ func (c *APIClient) ParseTrojanNodeResponse(nodeInfoResponse *NodeInfoResponse) 
 		EnableTLS:         true,
 		TLSType:           TLSType,
 		Host:              host,
-		ServiceName:       host,
+		ServiceName:       nodeInfoResponse.Sni,
 	}
 
 	return nodeinfo, nil

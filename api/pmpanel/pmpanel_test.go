@@ -10,9 +10,9 @@ import (
 
 func CreateClient() api.API {
 	apiConfig := &api.Config{
-		APIHost:  "https://yyds.me",
+		APIHost:  "http://webapi.yyds.me",
 		Key:      "123456",
-		NodeID:   3,
+		NodeID:   4,
 		NodeType: "V2ray",
 	}
 	client := pmpanel.New(apiConfig)
@@ -31,12 +31,13 @@ func TestGetV2rayNodeinfo(t *testing.T) {
 
 func TestGetSSNodeinfo(t *testing.T) {
 	apiConfig := &api.Config{
-		APIHost:  "https://yyds.me",
+		APIHost:  "http://webapi.yyds.me",
 		Key:      "123456",
 		NodeID:   1,
 		NodeType: "Shadowsocks",
 	}
 	client := pmpanel.New(apiConfig)
+	client.Debug()
 	nodeInfo, err := client.GetNodeInfo()
 	if err != nil {
 		t.Error(err)
@@ -46,12 +47,13 @@ func TestGetSSNodeinfo(t *testing.T) {
 
 func TestGetTrojanNodeinfo(t *testing.T) {
 	apiConfig := &api.Config{
-		APIHost:  "https://yyds.me",
+		APIHost:  "http://webapi.yyds.me",
 		Key:      "123456",
 		NodeID:   1,
 		NodeType: "Trojan",
 	}
 	client := pmpanel.New(apiConfig)
+	client.Debug()
 	nodeInfo, err := client.GetNodeInfo()
 	if err != nil {
 		t.Error(err)

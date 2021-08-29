@@ -16,6 +16,7 @@ type NodeInfoResponse struct {
 	Host            string  `json:"host"`
 	Path            string  `json:"path"`
 	Grpc            bool    `json:"grpc"`
+	Sni             string  `json:sni`
 }
 
 // UserResponse is the response of user
