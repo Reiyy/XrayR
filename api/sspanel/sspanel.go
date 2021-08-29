@@ -340,7 +340,7 @@ func (c *APIClient) ReportIllegal(detectResultList *[]api.DetectResult) error {
 // ParseV2rayNodeResponse parse the response for the given nodeinfor format
 func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (*api.NodeInfo, error) {
 	var enableTLS bool
-	var path, host, TLStype, transportProtocol, serviceName, HeaderType string
+	var path, host, TLStype, transportProtocol, serviceName, HeaderType  string
 	var speedlimit uint64 = 0
 	if nodeInfoResponse.RawServerString == "" {
 		return nil, fmt.Errorf("No server info in response")
@@ -388,9 +388,9 @@ func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (
 		case "host":
 			host = value
 		case "servicename":
-			serviceName = value
+			serviceName = value	
 		case "headertype":
-			HeaderType = value
+			HeaderType = value			
 		}
 	}
 	if c.SpeedLimit > 0 {
@@ -503,7 +503,7 @@ func (c *APIClient) ParseSSPluginNodeResponse(nodeInfoResponse *NodeInfoResponse
 			transportProtocol = "tcp"
 		}
 	}
-
+	
 	extraServerConf := strings.Split(serverConf[5], "|")
 	for _, item := range extraServerConf {
 		conf := strings.Split(item, "=")
@@ -578,7 +578,7 @@ func (c *APIClient) ParseTrojanNodeResponse(nodeInfoResponse *NodeInfoResponse) 
 	if err != nil {
 		return nil, err
 	}
-
+	
 	serverConf := strings.Split(nodeInfoResponse.RawServerString, ";")
 	extraServerConf := strings.Split(serverConf[1], "|")
 	transportProtocol = "tcp"
@@ -597,7 +597,7 @@ func (c *APIClient) ParseTrojanNodeResponse(nodeInfoResponse *NodeInfoResponse) 
 			serviceName = value
 		}
 	}
-
+	
 	if c.SpeedLimit > 0 {
 		speedlimit = uint64((c.SpeedLimit * 1000000) / 8)
 	} else {
@@ -622,30 +622,21 @@ func (c *APIClient) ParseTrojanNodeResponse(nodeInfoResponse *NodeInfoResponse) 
 
 // ParseUserListResponse parse the response for the given nodeinfo format
 func (c *APIClient) ParseUserListResponse(userInfoResponse *[]UserResponse) (*[]api.UserInfo, error) {
-	var deviceLimit, localDeviceLimit int = 0, 0
+	var deviceLimit int = 0
 	var speedlimit uint64 = 0
-	userList := []api.UserInfo{}
-	for _, user := range *userInfoResponse {
+	userList := make([]api.UserInfo, len(*userInfoResponse))
+	for i, user := range *userInfoResponse {
 		if c.DeviceLimit > 0 {
 			deviceLimit = c.DeviceLimit
 		} else {
 			deviceLimit = user.DeviceLimit
 		}
-		// If there is still device available, add the user
-		if deviceLimit > 0 {
-			if localDeviceLimit = deviceLimit - user.AliveIP; localDeviceLimit < 0 {
-				continue
-			} else {
-				deviceLimit = localDeviceLimit
-			}
-		}
-
 		if c.SpeedLimit > 0 {
 			speedlimit = uint64((c.SpeedLimit * 1000000) / 8)
 		} else {
 			speedlimit = uint64((user.SpeedLimit * 1000000) / 8)
 		}
-		userList = append(userList, api.UserInfo{
+		userList[i] = api.UserInfo{
 			UID:           user.ID,
 			Email:         user.Email,
 			UUID:          user.UUID,
@@ -658,7 +649,7 @@ func (c *APIClient) ParseUserListResponse(userInfoResponse *[]UserResponse) (*[]
 			ProtocolParam: user.ProtocolParam,
 			Obfs:          user.Obfs,
 			ObfsParam:     user.ObfsParam,
-		})
+		}
 	}
 
 	return &userList, nil
