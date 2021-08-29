@@ -9,7 +9,6 @@ import (
 	"reflect"
 	"regexp"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/XrayR-project/XrayR/api"
@@ -58,9 +57,9 @@ func New(apiConfig *api.Config) *APIClient {
 	})
 	client.SetHostURL(apiConfig.APIHost)
 	// Create Key for each requests
-	client.SetQueryParam("key", apiConfig.Key)
-	// Add support for muKey
-	client.SetQueryParam("muKey", apiConfig.Key)
+	client.SetHeaders(map[string]string{
+		"key": apiConfig.Key,
+	})
 	// Read local rule list
 	localRuleList := readLocalRuleList(apiConfig.RuleListPath)
 	apiClient := &APIClient{
@@ -138,7 +137,7 @@ func (c *APIClient) parseResponse(res *resty.Response, path string, err error) (
 	}
 	response := res.Result().(*Response)
 
-	if response.Ret != 1 {
+	if response.Ret != 200 {
 		res, _ := json.Marshal(&response)
 		return nil, fmt.Errorf("Ret %s invalid", string(res))
 	}
@@ -147,8 +146,24 @@ func (c *APIClient) parseResponse(res *resty.Response, path string, err error) (
 
 // GetNodeInfo will pull NodeInfo Config from sspanel
 func (c *APIClient) GetNodeInfo() (nodeInfo *api.NodeInfo, err error) {
-	path := fmt.Sprintf("/mod_mu/nodes/%d/info", c.NodeID)
+	path := fmt.Sprintf("/api/node")
+	var nodeType = ""
+	switch c.NodeType {
+	case "Shadowsocks":
+		nodeType = "ss"
+	case "V2ray":
+		nodeType = "v2ray"
+	case "Trojan":
+		nodeType = "trojan"
+	default:
+		return nil, fmt.Errorf("NodeType Error: %s", c.NodeType)
+	}
+	// body := fmt.Sprintf(`{"type":"%s", "nodeId":%d}`, nodeType, c.NodeID)
 	res, err := c.client.R().
+		SetQueryParams(map[string]string{
+			"type":   nodeType,
+			"nodeId": strconv.Itoa(c.NodeID),
+		}).
 		SetResult(&Response{}).
 		ForceContentType("application/json").
 		Get(path)
@@ -184,9 +199,24 @@ func (c *APIClient) GetNodeInfo() (nodeInfo *api.NodeInfo, err error) {
 
 // GetUserList will pull user form sspanel
 func (c *APIClient) GetUserList() (UserList *[]api.UserInfo, err error) {
-	path := "/mod_mu/users"
+	path := "/api/users"
+	var nodeType = ""
+	switch c.NodeType {
+	case "Shadowsocks":
+		nodeType = "ss"
+	case "V2ray":
+		nodeType = "v2ray"
+	case "Trojan":
+		nodeType = "trojan"
+	default:
+		return nil, fmt.Errorf("NodeType Error: %s", c.NodeType)
+	}
 	res, err := c.client.R().
-		SetQueryParam("node_id", strconv.Itoa(c.NodeID)).
+		SetQueryParams(map[string]string{
+			"type":   nodeType,
+			"nodeId": strconv.Itoa(c.NodeID),
+			"all":    "true",
+		}).
 		SetResult(&Response{}).
 		ForceContentType("application/json").
 		Get(path)
@@ -196,12 +226,17 @@ func (c *APIClient) GetUserList() (UserList *[]api.UserInfo, err error) {
 		return nil, err
 	}
 
-	userListResponse := new([]UserResponse)
-
-	if err := json.Unmarshal(response.Data, userListResponse); err != nil {
+	userListResponse := make(map[string]*[]UserResponse)
+	if err := json.Unmarshal(response.Data, &userListResponse); err != nil {
 		return nil, fmt.Errorf("Unmarshal %s failed: %s", reflect.TypeOf(userListResponse), err)
 	}
-	userList, err := c.ParseUserListResponse(userListResponse)
+	var addOrUpdate *[]UserResponse
+	for k, v := range userListResponse {
+		if k == "addOrUpdate" {
+			addOrUpdate = v
+		}
+	}
+	userList, err := c.ParseUserListResponse(addOrUpdate)
 	if err != nil {
 		res, _ := json.Marshal(userListResponse)
 		return nil, fmt.Errorf("Parse user list failed: %s", string(res))
@@ -211,64 +246,40 @@ func (c *APIClient) GetUserList() (UserList *[]api.UserInfo, err error) {
 
 // ReportNodeStatus reports the node status to the sspanel
 func (c *APIClient) ReportNodeStatus(nodeStatus *api.NodeStatus) (err error) {
-	path := fmt.Sprintf("/mod_mu/nodes/%d/info", c.NodeID)
-	systemload := SystemLoad{
-		Uptime: strconv.Itoa(nodeStatus.Uptime),
-		Load:   fmt.Sprintf("%.2f %.2f %.2f", nodeStatus.CPU/100, nodeStatus.CPU/100, nodeStatus.CPU/100),
-	}
-
-	res, err := c.client.R().
-		SetBody(systemload).
-		SetResult(&Response{}).
-		ForceContentType("application/json").
-		Post(path)
-
-	_, err = c.parseResponse(res, path, err)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
 //ReportNodeOnlineUsers reports online user ip
 func (c *APIClient) ReportNodeOnlineUsers(onlineUserList *[]api.OnlineUser) error {
-
-	data := make([]OnlineUser, len(*onlineUserList))
-	for i, user := range *onlineUserList {
-		data[i] = OnlineUser{UID: user.UID, IP: user.IP}
-	}
-	postData := &PostData{Data: data}
-	path := fmt.Sprintf("/mod_mu/users/aliveip")
-	res, err := c.client.R().
-		SetQueryParam("node_id", strconv.Itoa(c.NodeID)).
-		SetBody(postData).
-		SetResult(&Response{}).
-		ForceContentType("application/json").
-		Post(path)
-
-	_, err = c.parseResponse(res, path, err)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
 // ReportUserTraffic reports the user traffic
 func (c *APIClient) ReportUserTraffic(userTraffic *[]api.UserTraffic) error {
-
+	var nodeType = ""
+	switch c.NodeType {
+	case "Shadowsocks":
+		nodeType = "ss"
+	case "V2ray":
+		nodeType = "v2ray"
+	case "Trojan":
+		nodeType = "trojan"
+	default:
+		return fmt.Errorf("NodeType Error: %s", c.NodeType)
+	}
 	data := make([]UserTraffic, len(*userTraffic))
 	for i, traffic := range *userTraffic {
 		data[i] = UserTraffic{
 			UID:      traffic.UID,
 			Upload:   traffic.Upload,
-			Download: traffic.Download}
+			Download: traffic.Download,
+		}
 	}
-	postData := &PostData{Data: data}
-	path := "/mod_mu/users/traffic"
+	postData := &PostData{Type: nodeType, NodeId: c.NodeID, Users: data}
+	path := "/api/traffic"
+
 	res, err := c.client.R().
-		SetQueryParam("node_id", strconv.Itoa(c.NodeID)).
+		SetHeader("Content-Type", "application/json").
 		SetBody(postData).
 		SetResult(&Response{}).
 		ForceContentType("application/json").
@@ -281,11 +292,26 @@ func (c *APIClient) ReportUserTraffic(userTraffic *[]api.UserTraffic) error {
 	return nil
 }
 
-// GetNodeRule will pull the audit rule form sspanel
+// GetNodeRule will pull the audit rule form pmpanel
 func (c *APIClient) GetNodeRule() (*[]api.DetectRule, error) {
 	ruleList := c.LocalRuleList
-	path := "/mod_mu/func/detect_rules"
+	path := "/api/rules"
+	var nodeType = ""
+	switch c.NodeType {
+	case "Shadowsocks":
+		nodeType = "ss"
+	case "V2ray":
+		nodeType = "v2ray"
+	case "Trojan":
+		nodeType = "trojan"
+	default:
+		return nil, fmt.Errorf("NodeType Error: %s", c.NodeType)
+	}
 	res, err := c.client.R().
+		SetQueryParams(map[string]string{
+			"type":   nodeType,
+			"nodeId": strconv.Itoa(c.NodeID),
+		}).
 		SetResult(&Response{}).
 		ForceContentType("application/json").
 		Get(path)
@@ -312,26 +338,6 @@ func (c *APIClient) GetNodeRule() (*[]api.DetectRule, error) {
 
 // ReportIllegal reports the user illegal behaviors
 func (c *APIClient) ReportIllegal(detectResultList *[]api.DetectResult) error {
-
-	data := make([]IllegalItem, len(*detectResultList))
-	for i, r := range *detectResultList {
-		data[i] = IllegalItem{
-			ID:  r.RuleID,
-			UID: r.UID,
-		}
-	}
-	postData := &PostData{Data: data}
-	path := "/mod_mu/users/detectlog"
-	res, err := c.client.R().
-		SetQueryParam("node_id", strconv.Itoa(c.NodeID)).
-		SetBody(postData).
-		SetResult(&Response{}).
-		ForceContentType("application/json").
-		Post(path)
-	_, err = c.parseResponse(res, path, err)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
@@ -340,50 +346,22 @@ func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (
 	var enableTLS bool
 	var path, host, TLStype, transportProtocol string
 	var speedlimit uint64 = 0
-	if nodeInfoResponse.RawServerString == "" {
-		return nil, fmt.Errorf("No server info in response")
-	}
-	//nodeInfo.RawServerString = strings.ToLower(nodeInfo.RawServerString)
-	serverConf := strings.Split(nodeInfoResponse.RawServerString, ";")
-	port, err := strconv.Atoi(serverConf[1])
-	if err != nil {
-		return nil, err
-	}
-	alterID, err := strconv.Atoi(serverConf[2])
-	if err != nil {
-		return nil, err
-	}
+	path = nodeInfoResponse.Path
+	host = nodeInfoResponse.Host
+	port := nodeInfoResponse.Port
+	alterID := nodeInfoResponse.AlterId
 	// Compatible with more node types config
-	for _, value := range serverConf[3:5] {
-		switch value {
-		case "tls", "xtls":
-			if c.EnableXTLS {
-				TLStype = "xtls"
-			} else {
-				TLStype = "tls"
-			}
-			enableTLS = true
-		default:
-			if value != "" {
-				transportProtocol = value
-			}
+	switch nodeInfoResponse.Security {
+	case "tls", "xtls":
+		if c.EnableXTLS {
+			TLStype = "xtls"
+		} else {
+			TLStype = "tls"
 		}
-	}
-	extraServerConf := strings.Split(serverConf[5], "|")
-
-	for _, item := range extraServerConf {
-		conf := strings.Split(item, "=")
-		key := conf[0]
-		if key == "" {
-			continue
-		}
-		value := conf[1]
-		switch key {
-		case "path":
-			rawPath := strings.Join(conf[1:], "=") // In case of the path strings contains the "="
-			path = rawPath
-		case "host":
-			host = value
+		enableTLS = true
+	default:
+		if nodeInfoResponse.Network != "" {
+			transportProtocol = nodeInfoResponse.Network
 		}
 	}
 	if c.SpeedLimit > 0 {
@@ -391,7 +369,6 @@ func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (
 	} else {
 		speedlimit = uint64((nodeInfoResponse.SpeedLimit * 1000000) / 8)
 	}
-
 	// Create GeneralNodeInfo
 	nodeinfo := &api.NodeInfo{
 		NodeType:          c.NodeType,
@@ -405,6 +382,7 @@ func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (
 		Path:              path,
 		Host:              host,
 		EnableVless:       c.EnableVless,
+		ServiceName:       host,
 	}
 
 	return nodeinfo, nil
@@ -415,14 +393,7 @@ func (c *APIClient) ParseSSNodeResponse(nodeInfoResponse *NodeInfoResponse) (*ap
 	var port int = 0
 	var speedlimit uint64 = 0
 
-	if result := firstPortRe.FindStringSubmatch(nodeInfoResponse.RawServerString); len(result) > 1 {
-		outsidePort := result[1]
-		p, err := strconv.Atoi(outsidePort)
-		if err != nil {
-			return nil, err
-		}
-		port = p
-	}
+	port = nodeInfoResponse.Port
 
 	if c.SpeedLimit > 0 {
 		speedlimit = uint64((c.SpeedLimit * 1000000) / 8)
@@ -446,41 +417,24 @@ func (c *APIClient) ParseSSNodeResponse(nodeInfoResponse *NodeInfoResponse) (*ap
 func (c *APIClient) ParseTrojanNodeResponse(nodeInfoResponse *NodeInfoResponse) (*api.NodeInfo, error) {
 	// 域名或IP;port=连接端口#偏移端口|host=xx
 	// gz.aaa.com;port=443#12345|host=hk.aaa.com
-	var p, TLSType, host, outsidePort, insidePort string
+	var TLSType, host string
+	var transportProtocol = "tcp"
 	var speedlimit uint64 = 0
 	if c.EnableXTLS {
 		TLSType = "xtls"
 	} else {
 		TLSType = "tls"
 	}
+	host = nodeInfoResponse.Host
+	port := nodeInfoResponse.Port
 
-	if nodeInfoResponse.RawServerString == "" {
-		return nil, fmt.Errorf("No server info in response")
-	}
-	if result := firstPortRe.FindStringSubmatch(nodeInfoResponse.RawServerString); len(result) > 1 {
-		outsidePort = result[1]
-	}
-	if result := secondPortRe.FindStringSubmatch(nodeInfoResponse.RawServerString); len(result) > 1 {
-		insidePort = result[1]
-	}
-	if result := hostRe.FindStringSubmatch(nodeInfoResponse.RawServerString); len(result) > 1 {
-		host = result[1]
-	}
-
-	if insidePort != "" {
-		p = insidePort
-	} else {
-		p = outsidePort
-	}
-
-	port, err := strconv.Atoi(p)
-	if err != nil {
-		return nil, err
-	}
 	if c.SpeedLimit > 0 {
 		speedlimit = uint64((c.SpeedLimit * 1000000) / 8)
 	} else {
 		speedlimit = uint64((nodeInfoResponse.SpeedLimit * 1000000) / 8)
+	}
+	if nodeInfoResponse.Grpc {
+		transportProtocol = "grpc"
 	}
 	// Create GeneralNodeInfo
 	nodeinfo := &api.NodeInfo{
@@ -488,10 +442,11 @@ func (c *APIClient) ParseTrojanNodeResponse(nodeInfoResponse *NodeInfoResponse) 
 		NodeID:            c.NodeID,
 		Port:              port,
 		SpeedLimit:        speedlimit,
-		TransportProtocol: "tcp",
+		TransportProtocol: transportProtocol,
 		EnableTLS:         true,
 		TLSType:           TLSType,
 		Host:              host,
+		ServiceName:       host,
 	}
 
 	return nodeinfo, nil
@@ -514,18 +469,11 @@ func (c *APIClient) ParseUserListResponse(userInfoResponse *[]UserResponse) (*[]
 			speedlimit = uint64((user.SpeedLimit * 1000000) / 8)
 		}
 		userList[i] = api.UserInfo{
-			UID:           user.ID,
-			Email:         user.Email,
-			UUID:          user.UUID,
-			Passwd:        user.Passwd,
-			SpeedLimit:    speedlimit,
-			DeviceLimit:   deviceLimit,
-			Port:          user.Port,
-			Method:        user.Method,
-			Protocol:      user.Protocol,
-			ProtocolParam: user.ProtocolParam,
-			Obfs:          user.Obfs,
-			ObfsParam:     user.ObfsParam,
+			UID:         user.ID,
+			Passwd:      user.Passwd,
+			UUID:        user.Passwd,
+			SpeedLimit:  speedlimit,
+			DeviceLimit: deviceLimit,
 		}
 	}
 

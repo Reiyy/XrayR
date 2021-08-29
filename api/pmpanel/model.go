@@ -4,34 +4,26 @@ import "encoding/json"
 
 // NodeInfoResponse is the response of node
 type NodeInfoResponse struct {
-	Group           int     `json:"node_group"`
-	Class           int     `json:"node_class"`
-	SpeedLimit      float64 `json:"node_speedlimit"`
+	Class           int     `json:"clazz"`
+	SpeedLimit      float64 `json:"speedlimit"`
 	Method          string  `json:"method"`
-	TrafficRate     float64 `json:"traffic_rate"`
-	MuOnly          int     `json:"mu_only"`
-	Sort            int     `json:"sort"`
-	RawServerString string  `json:"server"`
-	Type            string  `json:"type"`
+	TrafficRate     float64 `json:"trafficRate"`
+	RawServerString string  `json:"outServer"`
+	Port            int     `json:"outPort"`
+	AlterId         int     `json:"alterId"`
+	Network         string  `json:"network"`
+	Security        string  `json:"security"`
+	Host            string  `json:"host"`
+	Path            string  `json:"path"`
+	Grpc            bool    `json:"grpc"`
 }
 
 // UserResponse is the response of user
 type UserResponse struct {
-	ID            int     `json:"id"`
-	Email         string  `json:"email"`
-	Passwd        string  `json:"passwd"`
-	Port          int     `json:"port"`
-	Method        string  `json:"method"`
-	SpeedLimit    float64 `json:"node_speedlimit"`
-	DeviceLimit   int     `json:"node_connector"`
-	Protocol      string  `json:"protocol"`
-	ProtocolParam string  `json:"protocol_param"`
-	Obfs          string  `json:"obfs"`
-	ObfsParam     string  `json:"obfs_param"`
-	ForbiddenIP   string  `json:"forbidden_ip"`
-	ForbiddenPort string  `json:"forbidden_port"`
-	UUID          string  `json:"uuid"`
-	MultiUser     int     `json:"is_multi_user"`
+	ID          int     `json:"id"`
+	Passwd      string  `json:"passwd"`
+	SpeedLimit  float64 `json:"speedlimit"`
+	DeviceLimit int     `json:"connector"`
 }
 
 // Response is the common response
@@ -42,7 +34,9 @@ type Response struct {
 
 // PostData is the data structure of post data
 type PostData struct {
-	Data interface{} `json:"data"`
+	Type   string      `json:"type"`
+	NodeId int         `json:"nodeId"`
+	Users  interface{} `json:"users"`
 }
 
 // SystemLoad is the data structure of systemload
@@ -59,9 +53,10 @@ type OnlineUser struct {
 
 // UserTraffic is the data structure of traffic
 type UserTraffic struct {
-	UID      int   `json:"user_id"`
-	Upload   int64 `json:"u"`
-	Download int64 `json:"d"`
+	UID      int    `json:"id"`
+	Upload   int64  `json:"up"`
+	Download int64  `json:"down"`
+	Ip       string `json:"ip"`
 }
 
 type RuleItem struct {
