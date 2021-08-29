@@ -9,7 +9,7 @@ import (
 
 func CreateClient() api.API {
 	apiConfig := &api.Config{
-		APIHost:  "http://127.0.0.1:668",
+		APIHost:  "http://localhost:9897",
 		Key:      "qwertyuiopasdfghjkl",
 		NodeID:   1,
 		NodeType: "V2ray",
@@ -20,7 +20,6 @@ func CreateClient() api.API {
 
 func TestGetV2rayNodeinfo(t *testing.T) {
 	client := CreateClient()
-
 	nodeInfo, err := client.GetNodeInfo()
 	if err != nil {
 		t.Error(err)
@@ -100,4 +99,3 @@ func TestGetNodeRule(t *testing.T) {
 
 	t.Log(ruleList)
 }
-

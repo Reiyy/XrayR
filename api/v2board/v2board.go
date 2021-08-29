@@ -2,6 +2,7 @@ package v2board
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -353,6 +354,7 @@ func (c *APIClient) ParseSSNodeResponse() (*api.NodeInfo, error) {
 func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *simplejson.Json) (*api.NodeInfo, error) {
 	var TLSType string = "tls"
 	var path, host, serviceName string
+	var header json.RawMessage
 	var enableTLS bool
 	var alterID int = 0
 	if c.EnableXTLS {
@@ -367,7 +369,18 @@ func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *simplejson.Json) (*
 		path = inboundInfo.Get("streamSettings").Get("wsSettings").Get("path").MustString()
 		host = inboundInfo.Get("streamSettings").Get("wsSettings").Get("headers").Get("Host").MustString()
 	case "grpc":
-		serviceName = inboundInfo.Get("streamSettings").Get("grpcSettings").Get("serviceName").MustString()
+		if data, ok := inboundInfo.Get("streamSettings").Get("grpcSettings").CheckGet("serviceName"); ok {
+			serviceName = data.MustString()
+		}
+	case "tcp":
+		if data, ok := inboundInfo.Get("streamSettings").Get("tcpSettings").CheckGet("header"); ok {
+			if httpHeader, err := data.MarshalJSON(); err != nil {
+				return nil, err
+			} else {
+				header = httpHeader
+			}
+		}
+
 	}
 	if inboundInfo.Get("streamSettings").Get("security").MustString() == "tls" {
 		enableTLS = true
@@ -395,6 +408,7 @@ func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *simplejson.Json) (*
 		Host:              host,
 		EnableVless:       c.EnableVless,
 		ServiceName:       serviceName,
+		Header:            header,
 	}
 	return nodeinfo, nil
 }
