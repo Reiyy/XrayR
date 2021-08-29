@@ -1,5 +1,7 @@
 package api
 
+import "encoding/json"
+
 // API config
 type Config struct {
 	APIHost      string  `mapstructure:"ApiHost"`
@@ -37,7 +39,7 @@ type NodeInfo struct {
 	EnableVless       bool
 	CypherMethod      string
 	ServiceName       string
-	HeaderType        string
+	Header            json.RawMessage
 }
 
 type UserInfo struct {
