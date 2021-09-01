@@ -55,22 +55,57 @@ func (p *Panel) loadCore(panelConfig *Config) *core.Instance {
 	coreDnsConfig := &conf.DNSConfig{}
 	if panelConfig.DnsConfigPath != "" {
 		if data, err := io.ReadFile(panelConfig.DnsConfigPath); err != nil {
-			log.Panicf("Failed to read dns.json at: %s", panelConfig.DnsConfigPath)
+			log.Panicf("Failed to read file at: %s", panelConfig.DnsConfigPath)
 		} else {
 			if err = json.Unmarshal(data, coreDnsConfig); err != nil {
-				log.Panicf("Failed to unmarshal dns.json")
+				log.Panicf("Failed to unmarshal: %s", panelConfig.DnsConfigPath)
 			}
 		}
 	}
-	dConfig, err := coreDnsConfig.Build()
+	dnsConfig, err := coreDnsConfig.Build()
 	if err != nil {
 		log.Panicf("Failed to understand dns.json, Please check: https://xtls.github.io/config/base/dns/ for help: %s", err)
+	}
+	// Routing config
+	coreRouterConfig := &conf.RouterConfig{}
+	if panelConfig.RouteConfigPath != "" {
+		if data, err := io.ReadFile(panelConfig.RouteConfigPath); err != nil {
+			log.Panicf("Failed to read file at: %s", panelConfig.RouteConfigPath)
+		} else {
+			if err = json.Unmarshal(data, coreRouterConfig); err != nil {
+				log.Panicf("Failed to unmarshal: %s", panelConfig.RouteConfigPath)
+			}
+		}
+	}
+	routeConfig, err := coreRouterConfig.Build()
+	if err != nil {
+		log.Panicf("Failed to understand dns.json, Please check: https://xtls.github.io/config/base/routing/ for help: %s", err)
+	}
+	// Custom Outbound config
+	coreCustomOutboundConfig := []conf.OutboundDetourConfig{}
+	if panelConfig.OutboundConfigPath != "" {
+		if data, err := io.ReadFile(panelConfig.OutboundConfigPath); err != nil {
+			log.Panicf("Failed to read file at: %s", panelConfig.OutboundConfigPath)
+		} else {
+			if err = json.Unmarshal(data, &coreCustomOutboundConfig); err != nil {
+				log.Panicf("Failed to unmarshal: %s", panelConfig.OutboundConfigPath)
+			}
+		}
+	}
+	outBoundConfig := []*core.OutboundHandlerConfig{}
+	for _, config := range coreCustomOutboundConfig {
+		oc, err := config.Build()
+		if err != nil {
+			log.Panicf("Failed to understand dns.json, Please check: https://xtls.github.io/config/base/outbounds/ for help: %s", err)
+		}
+		outBoundConfig = append(outBoundConfig, oc)
 	}
 	// Policy config
 	levelPolicyConfig := parseConnectionConfig(panelConfig.ConnetionConfig)
 	corePolicyConfig := &conf.PolicyConfig{}
 	corePolicyConfig.Levels = map[uint32]*conf.Policy{0: levelPolicyConfig}
-	pConfig, _ := corePolicyConfig.Build()
+	policyConfig, _ := corePolicyConfig.Build()
+	// Build Core Config
 	config := &core.Config{
 		App: []*serial.TypedMessage{
 			serial.ToTypedMessage(coreLogConfig.Build()),
@@ -78,9 +113,11 @@ func (p *Panel) loadCore(panelConfig *Config) *core.Instance {
 			serial.ToTypedMessage(&stats.Config{}),
 			serial.ToTypedMessage(&proxyman.InboundConfig{}),
 			serial.ToTypedMessage(&proxyman.OutboundConfig{}),
-			serial.ToTypedMessage(pConfig),
-			serial.ToTypedMessage(dConfig),
+			serial.ToTypedMessage(policyConfig),
+			serial.ToTypedMessage(dnsConfig),
+			serial.ToTypedMessage(routeConfig),
 		},
+		Outbound: outBoundConfig,
 	}
 	server, err := core.New(config)
 	if err != nil {

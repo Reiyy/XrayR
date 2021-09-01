@@ -6,10 +6,12 @@ import (
 )
 
 type Config struct {
-	LogConfig     *LogConfig     `mapstructure:"Log"`
-	DnsConfigPath string         `mapstructure:"DnsConfigPath"`
-	ConnetionConfig *ConnetionConfig `mapstructure:"ConnetionConfig"`
-	NodesConfig   []*NodesConfig `mapstructure:"Nodes"`
+	LogConfig          *LogConfig       `mapstructure:"Log"`
+	DnsConfigPath      string           `mapstructure:"DnsConfigPath"`
+	OutboundConfigPath string           `mapstructure:"OutboundConfigPath"`
+	RouteConfigPath  string           `mapstructure:"RouteConfigPath"`
+	ConnetionConfig    *ConnetionConfig `mapstructure:"ConnetionConfig"`
+	NodesConfig        []*NodesConfig   `mapstructure:"Nodes"`
 }
 
 type NodesConfig struct {
