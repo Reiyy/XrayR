@@ -3,7 +3,7 @@ package limiter
 
 import (
 	"fmt"
-	sync "sync"
+	"sync"
 	"time"
 
 	"github.com/XrayR-project/XrayR/api"
