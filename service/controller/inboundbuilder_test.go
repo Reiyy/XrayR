@@ -26,7 +26,10 @@ func TestBuildV2ray(t *testing.T) {
 		Provider:   "alidns",
 		Email:      "test@gmail.com",
 	}
-	_, err := InboundBuilder("0.0.0.0", nodeInfo, certConfig)
+	config := &Config{
+		CertConfig: certConfig,
+	}
+	_, err := InboundBuilder(config, nodeInfo)
 	if err != nil {
 		t.Error(err)
 	}
@@ -55,7 +58,10 @@ func TestBuildTrojan(t *testing.T) {
 		Email:      "test@gmail.com",
 		DNSEnv:     DNSEnv,
 	}
-	_, err := InboundBuilder("0.0.0.0", nodeInfo, certConfig)
+	config := &Config{
+		CertConfig: certConfig,
+	}
+	_, err := InboundBuilder(config, nodeInfo)
 	if err != nil {
 		t.Error(err)
 	}
@@ -84,7 +90,10 @@ func TestBuildSS(t *testing.T) {
 		Email:      "test@me.com",
 		DNSEnv:     DNSEnv,
 	}
-	_, err := InboundBuilder("0.0.0.0", nodeInfo, certConfig)
+	config := &Config{
+		CertConfig: certConfig,
+	}
+	_, err := InboundBuilder(config, nodeInfo)
 	if err != nil {
 		t.Error(err)
 	}
