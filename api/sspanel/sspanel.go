@@ -628,21 +628,30 @@ func (c *APIClient) ParseTrojanNodeResponse(nodeInfoResponse *NodeInfoResponse) 
 
 // ParseUserListResponse parse the response for the given nodeinfo format
 func (c *APIClient) ParseUserListResponse(userInfoResponse *[]UserResponse) (*[]api.UserInfo, error) {
-	var deviceLimit int = 0
+	var deviceLimit, localDeviceLimit int = 0, 0
 	var speedlimit uint64 = 0
-	userList := make([]api.UserInfo, len(*userInfoResponse))
-	for i, user := range *userInfoResponse {
+	userList := []api.UserInfo{}
+	for _, user := range *userInfoResponse {
 		if c.DeviceLimit > 0 {
 			deviceLimit = c.DeviceLimit
 		} else {
 			deviceLimit = user.DeviceLimit
 		}
+		// If there is still device available, add the user
+		if deviceLimit > 0 {
+			if localDeviceLimit = deviceLimit - user.AliveIP; localDeviceLimit <= 0 {
+				continue
+			} else {
+				deviceLimit = localDeviceLimit
+			}
+		}
+
 		if c.SpeedLimit > 0 {
 			speedlimit = uint64((c.SpeedLimit * 1000000) / 8)
 		} else {
 			speedlimit = uint64((user.SpeedLimit * 1000000) / 8)
 		}
-		userList[i] = api.UserInfo{
+		userList = append(userList, api.UserInfo{
 			UID:           user.ID,
 			Email:         user.Email,
 			UUID:          user.UUID,
@@ -655,7 +664,7 @@ func (c *APIClient) ParseUserListResponse(userInfoResponse *[]UserResponse) (*[]
 			ProtocolParam: user.ProtocolParam,
 			Obfs:          user.Obfs,
 			ObfsParam:     user.ObfsParam,
-		}
+		})
 	}
 
 	return &userList, nil
