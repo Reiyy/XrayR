@@ -640,6 +640,8 @@ github.com/xeipuuv/gojsonschema v1.2.0/go.mod h1:anYRn/JVcOK2ZgGU+IjEV4nwlhoK5sQ
 github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2/go.mod h1:UETIi67q53MR2AWcXfiuqkDkRtnGDLqkBTpCHuJHxtU=
 github.com/xtls/go v0.0.0-20210920065950-d4af136d3672 h1:4mkzGhKqt3JO1BWYjtD3iRFyAx4ow67hmSqOcGjuxqQ=
 github.com/xtls/go v0.0.0-20210920065950-d4af136d3672/go.mod h1:YGGVbz9cOxyKFUmhW7LGaLZaMA0cPlHJinvAmVxEMSU=
+github.com/xtls/xray-core v1.4.3 h1:L+DbIkzKYoIIDMJHipZw9M6mXHZJbcQR7O3X/bG8D7s=
+github.com/xtls/xray-core v1.4.3/go.mod h1:yrRjWxSGclPM2xfCzs1I970EpwxbB2Am0uqxL/pHWbM=
 github.com/xtls/xray-core v1.4.4 h1:FpYfhNOwSHoszeVanjPOI0rZQieh8oX54tU2NuBq7Ts=
 github.com/xtls/xray-core v1.4.4/go.mod h1:X20xgLe2QaIQkpK5Vm5fg7c1URypXXjCt9k/XYt+8iQ=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
