@@ -644,6 +644,8 @@ github.com/xtls/go v0.0.0-20210920065950-d4af136d3672 h1:4mkzGhKqt3JO1BWYjtD3iRF
 github.com/xtls/go v0.0.0-20210920065950-d4af136d3672/go.mod h1:YGGVbz9cOxyKFUmhW7LGaLZaMA0cPlHJinvAmVxEMSU=
 github.com/xtls/xray-core v1.4.3 h1:L+DbIkzKYoIIDMJHipZw9M6mXHZJbcQR7O3X/bG8D7s=
 github.com/xtls/xray-core v1.4.3/go.mod h1:yrRjWxSGclPM2xfCzs1I970EpwxbB2Am0uqxL/pHWbM=
+github.com/xtls/xray-core v1.4.5 h1:1XC1Bpu/cZSfSb0NAbXQwBLuSn0osx6nI3ukZMScICg=
+github.com/xtls/xray-core v1.4.5/go.mod h1:X20xgLe2QaIQkpK5Vm5fg7c1URypXXjCt9k/XYt+8iQ=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.3.5/go.mod h1:mwnBkeHKe2W/ZEtQ+71ViKU8L12m81fl3OWwC1Zlc8k=
 github.com/yuin/goldmark v1.4.0/go.mod h1:mwnBkeHKe2W/ZEtQ+71ViKU8L12m81fl3OWwC1Zlc8k=
