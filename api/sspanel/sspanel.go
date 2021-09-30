@@ -658,13 +658,13 @@ func (c *APIClient) ParseUserListResponse(userInfoResponse *[]UserResponse) (*[]
 		} else {
 			deviceLimit = user.DeviceLimit
 		}
+
 		// If there is still device available, add the user
-		if deviceLimit > 0 {
+		if deviceLimit > 0 && user.AliveIP > 0 {
 			lastOnline := 0
 			if v, ok := c.LastReportOnline[user.ID]; ok {
 				lastOnline = v
 			}
-
 			// If there are any available device.
 			if localDeviceLimit = deviceLimit - user.AliveIP + lastOnline; localDeviceLimit > 0 {
 				deviceLimit = localDeviceLimit
