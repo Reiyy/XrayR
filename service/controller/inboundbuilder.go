@@ -167,7 +167,13 @@ func InboundBuilder(config *Config, nodeInfo *api.NodeInfo) (*core.InboundHandle
 			streamSetting.XTLSSettings = xtlsSettings
 		}
 	}
-
+	// Support ProxyProtocol for any transport protocol
+	if networkType != "tcp" && networkType != "ws" && config.EnableProxyProtocol {
+		sockoptConfig := &conf.SocketConfig{
+			AcceptProxyProtocol: config.EnableProxyProtocol,
+		}
+		streamSetting.SocketSettings = sockoptConfig
+	}
 	inboundDetourConfig.Protocol = protocol
 	inboundDetourConfig.StreamSetting = streamSetting
 	inboundDetourConfig.Settings = &setting
