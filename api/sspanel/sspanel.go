@@ -745,7 +745,7 @@ func (c *APIClient) ParseSSPanelNodeInfo(nodeInfoResponse *NodeInfoResponse) (*a
 		if TLSType == "tls" || TLSType == "xtls" {
 			EnableTLS = true
 		}
-		if nodeConfig.EnableVless == 1 {
+		if nodeConfig.EnableVless == "1" {
 			EnableVless = true
 		}
 	}
@@ -753,13 +753,13 @@ func (c *APIClient) ParseSSPanelNodeInfo(nodeInfoResponse *NodeInfoResponse) (*a
 	if c.NodeType == "Trojan" {
 		EnableTLS = true
 		TLSType = "tls"
-		if nodeConfig.Grpc == 1 {
+		if nodeConfig.Grpc == "1" {
 			transportProtocol = "grpc"
 		} else {
 			transportProtocol = "tcp"
 		}
 
-		if nodeConfig.EnableXtls == 1 {
+		if nodeConfig.EnableXtls == "1" {
 			TLSType = "xtls"
 		}
 	}
