@@ -167,17 +167,23 @@ func (c *APIClient) GetNodeInfo() (nodeInfo *api.NodeInfo, err error) {
 	if err := json.Unmarshal(response.Data, nodeInfoResponse); err != nil {
 		return nil, fmt.Errorf("Unmarshal %s failed: %s", reflect.TypeOf(nodeInfoResponse), err)
 	}
-	switch c.NodeType {
-	case "V2ray":
-		nodeInfo, err = c.ParseV2rayNodeResponse(nodeInfoResponse)
-	case "Trojan":
-		nodeInfo, err = c.ParseTrojanNodeResponse(nodeInfoResponse)
-	case "Shadowsocks":
-		nodeInfo, err = c.ParseSSNodeResponse(nodeInfoResponse)
-	case "Shadowsocks-Plugin":
-		nodeInfo, err = c.ParseSSPluginNodeResponse(nodeInfoResponse)
-	default:
-		return nil, fmt.Errorf("Unsupported Node type: %s", c.NodeType)
+
+	// New sspanel API
+	if nodeInfoResponse.Version == "2021.11" {
+		nodeInfo, err = c.ParseSSPanelNodeInfo(nodeInfoResponse)
+	} else {
+		switch c.NodeType {
+		case "V2ray":
+			nodeInfo, err = c.ParseV2rayNodeResponse(nodeInfoResponse)
+		case "Trojan":
+			nodeInfo, err = c.ParseTrojanNodeResponse(nodeInfoResponse)
+		case "Shadowsocks":
+			nodeInfo, err = c.ParseSSNodeResponse(nodeInfoResponse)
+		case "Shadowsocks-Plugin":
+			nodeInfo, err = c.ParseSSPluginNodeResponse(nodeInfoResponse)
+		default:
+			return nil, fmt.Errorf("Unsupported Node type: %s", c.NodeType)
+		}
 	}
 
 	if err != nil {
@@ -699,4 +705,82 @@ func (c *APIClient) ParseUserListResponse(userInfoResponse *[]UserResponse) (*[]
 	}
 
 	return &userList, nil
+}
+
+// ParseSSPanelNodeInfo parse the response for the given nodeinfor format
+// Only used for SSPanel version >= 2021.11
+func (c *APIClient) ParseSSPanelNodeInfo(nodeInfoResponse *NodeInfoResponse) (*api.NodeInfo, error) {
+
+	var speedlimit uint64 = 0
+	var EnableTLS, EnableVless bool
+	var AlterID int = 0
+	var TLSType, transportProtocol string
+
+	nodeConfig := nodeInfoResponse.CustomConfig
+	if nodeConfig == nil {
+		return nil, fmt.Errorf("No custom config found")
+	}
+
+	if c.SpeedLimit > 0 {
+		speedlimit = uint64((c.SpeedLimit * 1000000) / 8)
+	} else {
+		speedlimit = uint64((nodeInfoResponse.SpeedLimit * 1000000) / 8)
+	}
+
+	port, err := strconv.Atoi(nodeConfig.OffsetPortNode)
+	if err != nil {
+		return nil, err
+	}
+
+	if c.NodeType == "Shadowsocks" {
+		transportProtocol = "tcp"
+	}
+
+	if c.NodeType == "V2ray" {
+		transportProtocol = nodeConfig.Network
+		TLSType := nodeConfig.Security
+		if AlterID, err = strconv.Atoi(nodeConfig.AlterID); err != nil {
+			return nil, err
+		}
+		if TLSType == "tls" || TLSType == "xtls" {
+			EnableTLS = true
+		}
+		if nodeConfig.EnableVless == 1 {
+			EnableVless = true
+		}
+	}
+
+	if c.NodeType == "Trojan" {
+		EnableTLS = true
+		TLSType = "tls"
+		if nodeConfig.Grpc == 1 {
+			transportProtocol = "grpc"
+		} else {
+			transportProtocol = "tcp"
+		}
+
+		if nodeConfig.EnableXtls == 1 {
+			TLSType = "xtls"
+		}
+	}
+
+	// Create GeneralNodeInfo
+	nodeinfo := &api.NodeInfo{
+		NodeType:          c.NodeType,
+		NodeID:            c.NodeID,
+		Port:              port,
+		SpeedLimit:        speedlimit,
+		AlterID:           AlterID,
+		TransportProtocol: transportProtocol,
+		Host:              nodeConfig.Host,
+		Path:              nodeConfig.Path,
+		EnableTLS:         EnableTLS,
+		TLSType:           TLSType,
+		EnableVless:       EnableVless,
+		CypherMethod:      nodeConfig.MuEncryption,
+		ServiceName:       nodeConfig.Servicename,
+		Header:            nodeConfig.Header,
+	}
+
+	return nodeinfo, nil
 }
