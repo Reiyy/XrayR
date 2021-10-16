@@ -17,31 +17,31 @@ type NodeInfoResponse struct {
 }
 
 type CustomConfig struct {
-	OffsetPortUser string           `json:"offset_port_user"`
-	OffsetPortNode string           `json:"offset_port_node"`
-	ServerSub      string           `json:"server_sub"`
-	Host           string           `json:"host"`
-	MuPort         string           `json:"mu_port"`
-	MuEncryption   string           `json:"mu_encryption"`
-	MuProtocol     string           `json:"mu_protocol"`
-	MuObfs         string           `json:"mu_obfs"`
-	MuSuffix       string           `json:"mu_suffix"`
-	V2Port         string           `json:"v2_port"`
-	TLS            int              `json:"tls"`
-	EnableVless    int              `json:"enable_vless"`
-	AlterID        string           `json:"alter_id"`
-	Network        string           `json:"network"`
-	Security       string           `json:"security"`
-	Path           string           `json:"path"`
-	VerifyCert     bool             `json:"verify_cert"`
-	Obfs           string           `json:"obfs"`
+	OffsetPortUser string          `json:"offset_port_user"`
+	OffsetPortNode string          `json:"offset_port_node"`
+	ServerSub      string          `json:"server_sub"`
+	Host           string          `json:"host"`
+	MuPort         string          `json:"mu_port"`
+	MuEncryption   string          `json:"mu_encryption"`
+	MuProtocol     string          `json:"mu_protocol"`
+	MuObfs         string          `json:"mu_obfs"`
+	MuSuffix       string          `json:"mu_suffix"`
+	V2Port         string          `json:"v2_port"`
+	TLS            string          `json:"tls"`
+	EnableVless    string          `json:"enable_vless"`
+	AlterID        string          `json:"alter_id"`
+	Network        string          `json:"network"`
+	Security       string          `json:"security"`
+	Path           string          `json:"path"`
+	VerifyCert     bool            `json:"verify_cert"`
+	Obfs           string          `json:"obfs"`
 	Header         json.RawMessage `json:"header"`
-	TrojanPort     string           `json:"trojan_port"`
-	AllowInsecure  int              `json:"allow_insecure"`
-	Grpc           int              `json:"grpc"`
-	Servicename    string           `json:"servicename"`
-	EnableXtls     int              `json:"enable_xtls"`
-	Flow           string           `json:"flow"`
+	TrojanPort     string          `json:"trojan_port"`
+	AllowInsecure  string          `json:"allow_insecure"`
+	Grpc           string          `json:"grpc"`
+	Servicename    string          `json:"servicename"`
+	EnableXtls     string          `json:"enable_xtls"`
+	Flow           string          `json:"flow"`
 }
 
 // UserResponse is the response of user
