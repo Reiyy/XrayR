@@ -94,6 +94,7 @@ TRX&(USDT-TRC20): THnoBdGW8W8tkCgATAbfTtEWV7jH3dz1dZ
 | 2021/06/02 | Anonymous                                      | 30 usdt   |
 | 2021/08/01 | Anonymous                                      | 77.5 usdt |
 | 2021/08/03 | [@steamsv](https://t.me/steamsv)               | 30 usdt   |
+| 2021/11/21 | [@Yuanserxyz](https://t.me/yuanserxyz)         | 300 usdt  |
 ## Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/XrayR-project/XrayR.svg)](https://starchart.cc/XrayR-project/XrayR)
