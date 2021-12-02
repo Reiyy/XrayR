@@ -226,17 +226,11 @@ func (c *APIClient) GetUserList() (UserList *[]api.UserInfo, err error) {
 		return nil, err
 	}
 
-	userListResponse := make(map[string]*[]UserResponse)
+	var userListResponse *[]UserResponse
 	if err := json.Unmarshal(response.Data, &userListResponse); err != nil {
 		return nil, fmt.Errorf("Unmarshal %s failed: %s", reflect.TypeOf(userListResponse), err)
 	}
-	var addOrUpdate *[]UserResponse
-	for k, v := range userListResponse {
-		if k == "addOrUpdate" {
-			addOrUpdate = v
-		}
-	}
-	userList, err := c.ParseUserListResponse(addOrUpdate)
+	userList, err := c.ParseUserListResponse(userListResponse)
 	if err != nil {
 		res, _ := json.Marshal(userListResponse)
 		return nil, fmt.Errorf("Parse user list failed: %s", string(res))
@@ -373,12 +367,21 @@ func (c *APIClient) ReportIllegal(detectResultList *[]api.DetectResult) error {
 // ParseV2rayNodeResponse parse the response for the given nodeinfor format
 func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (*api.NodeInfo, error) {
 	var enableTLS bool
-	var path, host, TLStype, transportProtocol string
+	var path, host, TLStype, transportProtocol, serviceName string
 	var speedlimit uint64 = 0
-	path = nodeInfoResponse.Path
-	host = nodeInfoResponse.Host
+
 	port := nodeInfoResponse.Port
 	alterID := nodeInfoResponse.AlterId
+	transportProtocol = nodeInfoResponse.Network
+	switch transportProtocol {
+	case "ws":
+		host = nodeInfoResponse.Host
+		path = nodeInfoResponse.Path
+	case "grpc":
+		serviceName = nodeInfoResponse.Sni
+	case "tcp":
+		// TODO
+	}
 	// Compatible with more node types config
 	switch nodeInfoResponse.Security {
 	case "tls", "xtls":
@@ -389,9 +392,7 @@ func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (
 		}
 		enableTLS = true
 	default:
-		if nodeInfoResponse.Network != "" {
-			transportProtocol = nodeInfoResponse.Network
-		}
+		enableTLS = false
 	}
 	if c.SpeedLimit > 0 {
 		speedlimit = uint64((c.SpeedLimit * 1000000) / 8)
@@ -411,7 +412,7 @@ func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (
 		Path:              path,
 		Host:              host,
 		EnableVless:       c.EnableVless,
-		ServiceName:       nodeInfoResponse.Sni,
+		ServiceName:       serviceName,
 	}
 
 	return nodeinfo, nil
