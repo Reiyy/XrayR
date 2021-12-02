@@ -23,8 +23,8 @@ type NodeInfoResponse struct {
 type UserResponse struct {
 	ID          int     `json:"id"`
 	Passwd      string  `json:"passwd"`
-	SpeedLimit  float64 `json:"speedlimit"`
-	DeviceLimit int     `json:"connector"`
+	SpeedLimit  float64 `json:"nodeSpeedlimit"`
+	DeviceLimit int     `json:"nodeConnector"`
 }
 
 // Response is the common response
