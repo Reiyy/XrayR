@@ -11,6 +11,7 @@ type Config struct {
 	DisableGetRule       bool              `mapstructure:"DisableGetRule"`
 	EnableProxyProtocol  bool              `mapstructure:"EnableProxyProtocol"`
 	EnableFallback       bool              `mapstructure:"EnableFallback"`
+	IVCheck              bool              `mapstructure:"IVCheck"`
 	FallBackConfigs      []*FallBackConfig `mapstructure:"FallBackConfigs"`
 }
 
