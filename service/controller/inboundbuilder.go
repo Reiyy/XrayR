@@ -96,7 +96,11 @@ func InboundBuilder(config *Config, nodeInfo *api.NodeInfo) (*core.InboundHandle
 		proxySetting, _ := proxySetting.(*conf.ShadowsocksServerConfig)
 		proxySetting.Users = append(proxySetting.Users, defaultSSuser)
 		proxySetting.NetworkList = &conf.NetworkList{"tcp", "udp"}
-		proxySetting.IVCheck = config.IVCheck
+		proxySetting.IVCheck = true
+		if config.DisableIVCheck {
+			proxySetting.IVCheck = false
+		}
+
 	} else if nodeInfo.NodeType == "dokodemo-door" {
 		protocol = "dokodemo-door"
 		proxySetting = struct {
