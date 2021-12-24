@@ -188,7 +188,7 @@ func (c *APIClient) GetNodeInfo() (nodeInfo *api.NodeInfo, err error) {
 
 	if err != nil {
 		res, _ := json.Marshal(nodeInfoResponse)
-		return nil, fmt.Errorf("Parse node info failed: %s", string(res))
+		return nil, fmt.Errorf("Parse node info failed: %s, \nError: %s", string(res), err)
 	}
 
 	return nodeInfo, nil
@@ -716,7 +716,8 @@ func (c *APIClient) ParseSSPanelNodeInfo(nodeInfoResponse *NodeInfoResponse) (*a
 	var AlterID int = 0
 	var TLSType, transportProtocol string
 
-	nodeConfig := nodeInfoResponse.CustomConfig
+	nodeConfig := new(CustomConfig)
+	json.Unmarshal(nodeInfoResponse.CustomConfig, nodeConfig)
 	if nodeConfig == nil {
 		return nil, fmt.Errorf("No custom config found")
 	}
