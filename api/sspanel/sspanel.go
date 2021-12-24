@@ -739,7 +739,7 @@ func (c *APIClient) ParseSSPanelNodeInfo(nodeInfoResponse *NodeInfoResponse) (*a
 
 	if c.NodeType == "V2ray" {
 		transportProtocol = nodeConfig.Network
-		TLSType := nodeConfig.Security
+		TLSType = nodeConfig.Security
 		if AlterID, err = strconv.Atoi(nodeConfig.AlterID); err != nil {
 			return nil, err
 		}
