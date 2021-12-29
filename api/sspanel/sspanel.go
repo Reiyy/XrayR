@@ -173,6 +173,10 @@ func (c *APIClient) GetNodeInfo() (nodeInfo *api.NodeInfo, err error) {
 	// New sspanel API
 	if nodeInfoResponse.Version == "2021.11" && !c.DisableCustomConfig {
 		nodeInfo, err = c.ParseSSPanelNodeInfo(nodeInfoResponse)
+		if err != nil {
+			res, _ := json.Marshal(nodeInfoResponse)
+			return nil, fmt.Errorf("Parse node info failed: %s, \nError: %s, \nPlease check the doc of custom_config for help: https://crackair.gitbook.io/xrayr-project/dui-jie-sspanel/sspanel/sspanel_custom_config", string(res), err)
+		}
 	} else {
 		switch c.NodeType {
 		case "V2ray":
