@@ -2,6 +2,7 @@
 package controller
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 
@@ -31,7 +32,7 @@ func InboundBuilder(config *Config, nodeInfo *api.NodeInfo) (*core.InboundHandle
 	}
 	inboundDetourConfig.PortList = portList
 	// Build Tag
-	inboundDetourConfig.Tag = fmt.Sprintf("%s_%d", nodeInfo.NodeType, nodeInfo.Port)
+	inboundDetourConfig.Tag = fmt.Sprintf("%s_%s_%d", nodeInfo.NodeType, base64.StdEncoding.EncodeToString([]byte(config.ListenIP)), nodeInfo.Port)
 	// SniffingConfig
 	sniffingConfig := &conf.SniffingConfig{
 		Enabled:      true,

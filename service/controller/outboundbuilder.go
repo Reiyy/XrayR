@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 
@@ -14,7 +15,7 @@ import (
 func OutboundBuilder(config *Config, nodeInfo *api.NodeInfo) (*core.OutboundHandlerConfig, error) {
 	outboundDetourConfig := &conf.OutboundDetourConfig{}
 	outboundDetourConfig.Protocol = "freedom"
-	outboundDetourConfig.Tag = fmt.Sprintf("%s_%d", nodeInfo.NodeType, nodeInfo.Port)
+	outboundDetourConfig.Tag = fmt.Sprintf("%s_%s_%d", nodeInfo.NodeType, base64.StdEncoding.EncodeToString([]byte(config.ListenIP)), nodeInfo.Port)
 
 	// Build Send IP address
 	if config.SendIP != "" {
