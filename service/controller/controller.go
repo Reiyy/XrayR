@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/base64"
 	"fmt"
 	"log"
 	"reflect"
@@ -56,7 +57,7 @@ func (c *Controller) Start() error {
 		return err
 	}
 	c.nodeInfo = newNodeInfo
-	c.Tag = fmt.Sprintf("%s_%d", c.nodeInfo.NodeType, c.nodeInfo.Port)
+	c.Tag = fmt.Sprintf("%s_%s_%d", c.nodeInfo.NodeType, base64.StdEncoding.EncodeToString([]byte(c.config.ListenIP)), c.nodeInfo.Port)
 	err = c.addNewUser(userInfo, newNodeInfo)
 	if err != nil {
 		return err
@@ -150,7 +151,7 @@ func (c *Controller) nodeInfoMonitor() (err error) {
 		}
 		nodeInfoChanged = true
 		c.nodeInfo = newNodeInfo
-		c.Tag = fmt.Sprintf("%s_%d", newNodeInfo.NodeType, newNodeInfo.Port)
+		c.Tag = fmt.Sprintf("%s_%s_%d", newNodeInfo.NodeType, base64.StdEncoding.EncodeToString([]byte(c.config.ListenIP)), newNodeInfo.Port)
 		// Remove Old limiter
 		if err = c.DeleteInboundLimiter(oldtag); err != nil {
 			log.Print(err)
