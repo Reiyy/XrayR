@@ -2,7 +2,6 @@
 package controller
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 
@@ -15,7 +14,7 @@ import (
 )
 
 //InboundBuilder build Inbound config for different protocol
-func InboundBuilder(config *Config, nodeInfo *api.NodeInfo) (*core.InboundHandlerConfig, error) {
+func InboundBuilder(config *Config, nodeInfo *api.NodeInfo, tag string) (*core.InboundHandlerConfig, error) {
 	inboundDetourConfig := &conf.InboundDetourConfig{}
 	// Build Listen IP address
 	if nodeInfo.NodeType == "Shadowsocks-Plugin" {
@@ -32,7 +31,7 @@ func InboundBuilder(config *Config, nodeInfo *api.NodeInfo) (*core.InboundHandle
 	}
 	inboundDetourConfig.PortList = portList
 	// Build Tag
-	inboundDetourConfig.Tag = fmt.Sprintf("%s_%s_%d", nodeInfo.NodeType, base64.StdEncoding.EncodeToString([]byte(config.ListenIP)), nodeInfo.Port)
+	inboundDetourConfig.Tag = tag
 	// SniffingConfig
 	sniffingConfig := &conf.SniffingConfig{
 		Enabled:      true,

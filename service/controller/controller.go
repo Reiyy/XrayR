@@ -45,6 +45,8 @@ func (c *Controller) Start() error {
 	if err != nil {
 		return err
 	}
+	c.nodeInfo = newNodeInfo
+	c.Tag = fmt.Sprintf("%s_%s_%d", c.nodeInfo.NodeType, base64.StdEncoding.EncodeToString([]byte(c.config.ListenIP)), c.nodeInfo.Port)
 	// Add new tag
 	err = c.addNewTag(newNodeInfo)
 	if err != nil {
@@ -56,8 +58,6 @@ func (c *Controller) Start() error {
 	if err != nil {
 		return err
 	}
-	c.nodeInfo = newNodeInfo
-	c.Tag = fmt.Sprintf("%s_%s_%d", c.nodeInfo.NodeType, base64.StdEncoding.EncodeToString([]byte(c.config.ListenIP)), c.nodeInfo.Port)
 	err = c.addNewUser(userInfo, newNodeInfo)
 	if err != nil {
 		return err
@@ -137,21 +137,21 @@ func (c *Controller) nodeInfoMonitor() (err error) {
 			return nil
 		}
 		if c.nodeInfo.NodeType == "Shadowsocks-Plugin" {
-			err = c.removeOldTag(fmt.Sprintf("dokodemo-door_%d", c.nodeInfo.Port+1))
+			err = c.removeOldTag(fmt.Sprintf("dokodemo-door_%s+1", c.Tag))
 		}
 		if err != nil {
 			log.Print(err)
 			return nil
 		}
 		// Add new tag
+		c.nodeInfo = newNodeInfo
+		c.Tag = fmt.Sprintf("%s_%s_%d", newNodeInfo.NodeType, base64.StdEncoding.EncodeToString([]byte(c.config.ListenIP)), newNodeInfo.Port)
 		err = c.addNewTag(newNodeInfo)
 		if err != nil {
 			log.Print(err)
 			return nil
 		}
 		nodeInfoChanged = true
-		c.nodeInfo = newNodeInfo
-		c.Tag = fmt.Sprintf("%s_%s_%d", newNodeInfo.NodeType, base64.StdEncoding.EncodeToString([]byte(c.config.ListenIP)), newNodeInfo.Port)
 		// Remove Old limiter
 		if err = c.DeleteInboundLimiter(oldtag); err != nil {
 			log.Print(err)
@@ -236,7 +236,7 @@ func (c *Controller) removeOldTag(oldtag string) (err error) {
 
 func (c *Controller) addNewTag(newNodeInfo *api.NodeInfo) (err error) {
 	if newNodeInfo.NodeType != "Shadowsocks-Plugin" {
-		inboundConfig, err := InboundBuilder(c.config, newNodeInfo)
+		inboundConfig, err := InboundBuilder(c.config, newNodeInfo, c.Tag)
 		if err != nil {
 			return err
 		}
@@ -245,7 +245,7 @@ func (c *Controller) addNewTag(newNodeInfo *api.NodeInfo) (err error) {
 
 			return err
 		}
-		outBoundConfig, err := OutboundBuilder(c.config, newNodeInfo)
+		outBoundConfig, err := OutboundBuilder(c.config, newNodeInfo, c.Tag)
 		if err != nil {
 
 			return err
@@ -268,7 +268,7 @@ func (c *Controller) addInboundForSSPlugin(newNodeInfo api.NodeInfo) (err error)
 	fakeNodeInfo.TransportProtocol = "tcp"
 	fakeNodeInfo.EnableTLS = false
 	// Add a regular Shadowsocks inbound and outbound
-	inboundConfig, err := InboundBuilder(c.config, &fakeNodeInfo)
+	inboundConfig, err := InboundBuilder(c.config, &fakeNodeInfo, c.Tag)
 	if err != nil {
 		return err
 	}
@@ -277,7 +277,7 @@ func (c *Controller) addInboundForSSPlugin(newNodeInfo api.NodeInfo) (err error)
 
 		return err
 	}
-	outBoundConfig, err := OutboundBuilder(c.config, &fakeNodeInfo)
+	outBoundConfig, err := OutboundBuilder(c.config, &fakeNodeInfo, c.Tag)
 	if err != nil {
 
 		return err
@@ -291,7 +291,8 @@ func (c *Controller) addInboundForSSPlugin(newNodeInfo api.NodeInfo) (err error)
 	fakeNodeInfo = newNodeInfo
 	fakeNodeInfo.Port++
 	fakeNodeInfo.NodeType = "dokodemo-door"
-	inboundConfig, err = InboundBuilder(c.config, &fakeNodeInfo)
+	dokodemoTag := fmt.Sprintf("dokodemo-door_%s+1", c.Tag)
+	inboundConfig, err = InboundBuilder(c.config, &fakeNodeInfo, dokodemoTag)
 	if err != nil {
 		return err
 	}
@@ -300,7 +301,7 @@ func (c *Controller) addInboundForSSPlugin(newNodeInfo api.NodeInfo) (err error)
 
 		return err
 	}
-	outBoundConfig, err = OutboundBuilder(c.config, &fakeNodeInfo)
+	outBoundConfig, err = OutboundBuilder(c.config, &fakeNodeInfo, dokodemoTag)
 	if err != nil {
 
 		return err
