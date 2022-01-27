@@ -28,7 +28,7 @@ type APIClient struct {
 	LocalRuleList []api.DetectRule
 }
 
-// New creat a api instance
+// New creat an api instance
 func New(apiConfig *api.Config) *APIClient {
 
 	client := resty.New()
@@ -48,9 +48,8 @@ func New(apiConfig *api.Config) *APIClient {
 	client.SetBaseURL(apiConfig.APIHost)
 	// Create Key for each requests
 	client.SetQueryParams(map[string]string{
-		"node_id":    strconv.Itoa(apiConfig.NodeID),
-		"token":      apiConfig.Key,
-		"local_port": "1",
+		"node_id": strconv.Itoa(apiConfig.NodeID),
+		"token":   apiConfig.Key,
 	})
 	// Read local rule list
 	localRuleList := readLocalRuleList(apiConfig.RuleListPath)
@@ -149,9 +148,10 @@ func (c *APIClient) GetNodeInfo() (nodeInfo *api.NodeInfo, err error) {
 			return nil, err
 		}
 	default:
-		return nil, fmt.Errorf("Unsupported Node type: %s", c.NodeType)
+		return nil, fmt.Errorf("unsupported Node type: %s", c.NodeType)
 	}
 	res, err := c.client.R().
+		SetQueryParam("local_port", "1").
 		ForceContentType("application/json").
 		Get(path)
 
@@ -168,7 +168,7 @@ func (c *APIClient) GetNodeInfo() (nodeInfo *api.NodeInfo, err error) {
 	case "Shadowsocks":
 		nodeInfo, err = c.ParseSSNodeResponse()
 	default:
-		return nil, fmt.Errorf("Unsupported Node type: %s", c.NodeType)
+		return nil, fmt.Errorf("unsupported Node type: %s", c.NodeType)
 	}
 
 	if err != nil {
@@ -190,10 +190,9 @@ func (c *APIClient) GetUserList() (UserList *[]api.UserInfo, err error) {
 	case "Shadowsocks":
 		path = "/api/v1/server/ShadowsocksTidalab/user"
 	default:
-		return nil, fmt.Errorf("Unsupported Node type: %s", c.NodeType)
+		return nil, fmt.Errorf("unsupported Node type: %s", c.NodeType)
 	}
 	res, err := c.client.R().
-		SetQueryParam("node_id", strconv.Itoa(c.NodeID)).
 		ForceContentType("application/json").
 		Get(path)
 
@@ -269,6 +268,7 @@ func (c *APIClient) GetNodeRule() (*[]api.DetectRule, error) {
 	// V2board only support the rule for v2ray
 	path := "/api/v1/server/Deepbwork/config"
 	res, err := c.client.R().
+		SetQueryParam("local_port", "1").
 		ForceContentType("application/json").
 		Get(path)
 
