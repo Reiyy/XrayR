@@ -14,7 +14,7 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-// APIClient create a api client to the panel.
+// APIClient create an api client to the panel.
 type APIClient struct {
 	client        *resty.Client
 	APIHost       string
@@ -28,7 +28,7 @@ type APIClient struct {
 	LocalRuleList []api.DetectRule
 }
 
-// New creat an api instance
+// New create an api instance
 func New(apiConfig *api.Config) *APIClient {
 
 	client := resty.New()
