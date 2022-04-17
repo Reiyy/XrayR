@@ -57,6 +57,10 @@ func (c *Controller) Start() error {
 	if err != nil {
 		return err
 	}
+	// initial node AlterID
+	if len(*userInfo) > 0 {
+		c.nodeInfo.AlterID = (*userInfo)[0].AlterID
+	}
 	err = c.addNewUser(userInfo, newNodeInfo)
 	if err != nil {
 		return err
@@ -86,9 +90,18 @@ func (c *Controller) Start() error {
 		Execute:  c.userInfoMonitor,
 	}
 	log.Printf("[%s: %d] Start monitor node status", c.nodeInfo.NodeType, c.nodeInfo.NodeID)
-	_ = c.nodeInfoMonitorPeriodic.Start()
+	// delay to start nodeInfoMonitor
+	go func() {
+		time.Sleep(time.Duration(c.config.UpdatePeriodic) * time.Second)
+		_ = c.nodeInfoMonitorPeriodic.Start()
+	}()
+
 	log.Printf("[%s: %d] Start report node status", c.nodeInfo.NodeType, c.nodeInfo.NodeID)
-	_ = c.userReportPeriodic.Start()
+	// delay to start userReport
+	go func() {
+		time.Sleep(time.Duration(c.config.UpdatePeriodic) * time.Second)
+		_ = c.userReportPeriodic.Start()
+	}()
 	return nil
 }
 
