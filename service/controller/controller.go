@@ -138,6 +138,11 @@ func (c *Controller) nodeInfoMonitor() (err error) {
 		return nil
 	}
 
+	// Fetch node AlterID
+	if len(*newUserInfo) > 0 {
+		c.nodeInfo.AlterID = (*newUserInfo)[0].AlterID
+	}
+
 	var nodeInfoChanged = false
 	// If nodeInfo changed
 	if !reflect.DeepEqual(c.nodeInfo, newNodeInfo) {
