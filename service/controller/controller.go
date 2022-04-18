@@ -24,14 +24,16 @@ type Controller struct {
 	userList                *[]api.UserInfo
 	nodeInfoMonitorPeriodic *task.Periodic
 	userReportPeriodic      *task.Periodic
+	panelType               string
 }
 
 // New return a Controller service with default parameters.
-func New(server *core.Instance, api api.API, config *Config) *Controller {
+func New(server *core.Instance, api api.API, config *Config, panelType string) *Controller {
 	controller := &Controller{
 		server:    server,
 		config:    config,
 		apiClient: api,
+		panelType: panelType,
 	}
 	return controller
 }
@@ -56,10 +58,6 @@ func (c *Controller) Start() error {
 	userInfo, err := c.apiClient.GetUserList()
 	if err != nil {
 		return err
-	}
-	// initial node AlterID
-	if len(*userInfo) > 0 {
-		c.nodeInfo.AlterID = (*userInfo)[0].AlterID
 	}
 	err = c.addNewUser(userInfo, newNodeInfo)
 	if err != nil {
@@ -136,11 +134,6 @@ func (c *Controller) nodeInfoMonitor() (err error) {
 	if err != nil {
 		log.Print(err)
 		return nil
-	}
-
-	// Fetch node AlterID
-	if len(*newUserInfo) > 0 {
-		c.nodeInfo.AlterID = (*newUserInfo)[0].AlterID
 	}
 
 	var nodeInfoChanged = false
@@ -337,7 +330,13 @@ func (c *Controller) addNewUser(userInfo *[]api.UserInfo, nodeInfo *api.NodeInfo
 		if nodeInfo.EnableVless {
 			users = c.buildVlessUser(userInfo)
 		} else {
-			users = c.buildVmessUser(userInfo, nodeInfo.AlterID)
+			alterID := 0
+			if c.panelType == "V2board" {
+				alterID = (*c.userList)[0].AlterID
+			} else {
+				alterID = c.nodeInfo.AlterID
+			}
+			users = c.buildVmessUser(userInfo, alterID)
 		}
 	} else if nodeInfo.NodeType == "Trojan" {
 		users = c.buildTrojanUser(userInfo)

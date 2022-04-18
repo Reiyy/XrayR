@@ -8,6 +8,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/XrayR-project/XrayR/api"
@@ -28,6 +29,7 @@ type APIClient struct {
 	DeviceLimit   int
 	LocalRuleList []api.DetectRule
 	ConfigResp    *simplejson.Json
+	access        sync.Mutex
 }
 
 // New create an api instance
@@ -158,6 +160,8 @@ func (c *APIClient) GetNodeInfo() (nodeInfo *api.NodeInfo, err error) {
 		Get(path)
 
 	response, err := c.parseResponse(res, path, err)
+	c.access.Lock()
+	defer c.access.Unlock()
 	c.ConfigResp = response
 	if err != nil {
 		return nil, err
@@ -270,6 +274,8 @@ func (c *APIClient) GetNodeRule() (*[]api.DetectRule, error) {
 
 	// V2board only support the rule for v2ray
 	// fix: reuse config response
+	c.access.Lock()
+	defer c.access.Unlock()
 	ruleListResponse := c.ConfigResp.Get("routing").Get("rules").GetIndex(1).Get("domain").MustStringArray()
 	for i, rule := range ruleListResponse {
 		ruleListItem := api.DetectRule{
